@@ -1,0 +1,51 @@
+import { TurnkeyApiTypes } from '@turnkey/sdk-server';
+import { JSONRPCRequest, MethodName, ParamsType } from './types';
+
+export async function jsonRpcRequest<M extends MethodName, T>(
+  url: string,
+  method: M,
+  params: ParamsType<M>
+): Promise<T> {
+  const requestBody: JSONRPCRequest<M> = {
+    method,
+    params,
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export const initOTPAuth = async (params: ParamsType<'initOTPAuth'>) => {
+  return jsonRpcRequest<'initOTPAuth', TurnkeyApiTypes['v1InitOtpAuthResult']>(
+    '/turnkey',
+    'initOTPAuth',
+    params
+  );
+};
+
+export const getSubOrgId = async (params: ParamsType<'getSubOrgId'>) => {
+  const { organizationIds } = await jsonRpcRequest<
+    'getSubOrgId',
+    TurnkeyApiTypes['v1GetSubOrgIdsResponse']
+  >('/turnkey', 'getSubOrgId', params);
+
+  return organizationIds[0];
+};
+
+export const createSubOrg = async (params: ParamsType<'createSubOrg'>) => {
+  return jsonRpcRequest<
+    'createSubOrg',
+    TurnkeyApiTypes['v1CreateSubOrganizationIntentV7']
+  >('/turnkey', 'createSubOrg', params);
+};
