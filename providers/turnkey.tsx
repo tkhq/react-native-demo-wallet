@@ -59,19 +59,22 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     method: 'OTP_AUTH' | 'PASSKEY' | 'EMAIL',
     params: any
   ): Promise<void> => {
+    console.log('login', method, params, client);
     // if (!client) {
     //   return Promise.reject(new Error('Client is not initialized'));
     // }
-
+    console.log('method === PASSKEY', method === 'PASSKEY');
     if (method === 'OTP_AUTH') {
       const response = await initOTPAuth(params);
       console.log(response);
     } else if (method === 'PASSKEY') {
+      console.log('isSupported', isSupported());
       if (!isSupported()) {
         throw new Error('Passkeys are not supported on this device');
       }
       const email = params.email;
       const subOrgId = await getSubOrgId(email);
+      console.log('subOrgId', subOrgId, email, params);
 
       if (!subOrgId) {
         // ID isn't visible by users, but needs to be random enough and valid base64 (for Android)

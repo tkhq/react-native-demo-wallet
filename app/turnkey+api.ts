@@ -8,9 +8,10 @@ const turnkey = new Turnkey({
   apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY ?? '',
 }).apiClient();
 export async function POST(request: Request) {
+  console.log('request', request);
   const body: JSONRPCRequest<MethodName> = await request.json();
   const { method, params } = body;
-
+  console.log('method', method, params);
   switch (method) {
     case 'getSubOrgId':
       return handleGetSubOrgId(params as ParamsType<'getSubOrgId'>);

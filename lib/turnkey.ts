@@ -10,15 +10,15 @@ export async function jsonRpcRequest<M extends MethodName, T>(
     method,
     params,
   };
-
-  const response = await fetch(url, {
+  console.log('requestBody', requestBody);
+  const response = await fetch('exp://192.168.0.43:8081/turnkey', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(requestBody),
   });
-
+  console.log('response', response);
   if (!response.ok) {
     throw new Error(`Error: ${response.statusText}`);
   }
