@@ -1,51 +1,78 @@
-import { TurnkeyApiTypes } from '@turnkey/sdk-server';
-import { JSONRPCRequest, MethodName, ParamsType } from './types';
+import { PasskeyStamper } from '@turnkey/react-native-passkey-stamper';
+import { TurnkeyClient } from '@turnkey/http';
 
-export async function jsonRpcRequest<M extends MethodName, T>(
-  url: string,
-  method: M,
-  params: ParamsType<M>
-): Promise<T> {
-  const requestBody: JSONRPCRequest<M> = {
-    method,
-    params,
-  };
-  console.log('requestBody', requestBody);
-  const response = await fetch('exp://192.168.0.43:8081/turnkey', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
+export const stampGetWhoami = async (organizationId: string) => {
+  const stamper = new PasskeyStamper({
+    rpId: 'localhost',
   });
-  console.log('response', response);
-  if (!response.ok) {
-    throw new Error(`Error: ${response.statusText}`);
-  }
 
-  return response.json();
-}
-
-export const initOTPAuth = async (params: ParamsType<'initOTPAuth'>) => {
-  return jsonRpcRequest<'initOTPAuth', TurnkeyApiTypes['v1InitOtpAuthResult']>(
-    '/turnkey',
-    'initOTPAuth',
-    params
+  const client = new TurnkeyClient(
+    { baseUrl: 'https://api.turnkey.com' },
+    stamper
   );
+
+  const signedRequest = await client.stampGetWhoami({
+    organizationId,
+  });
+  console.log('signedRequest', signedRequest);
+  const { url, body, stamp } = signedRequest;
+
+  // Forward the signed request to the Turnkey API for validation
+  const resp = await fetch(url, {
+    method: 'POST',
+    body,
+    headers: {
+      [stamp.stampHeaderName]: stamp.stampHeaderValue,
+    },
+  });
+
+  console.log(resp);
+
+  return resp;
 };
 
-export const getSubOrgId = async (params: ParamsType<'getSubOrgId'>) => {
-  const { organizationIds } = await jsonRpcRequest<
-    'getSubOrgId',
-    TurnkeyApiTypes['v1GetSubOrgIdsResponse']
-  >('/turnkey', 'getSubOrgId', params);
+// export const stampGetWhoami = (organizationId: string) => {
+//   return {
+//     with: async (authenticator: Authenticator) => {
+//       let stamper;
 
-  return organizationIds[0];
-};
+//       switch (authenticator) {
+//         case Authenticator.APIKey:
+//           stamper = await new ApiKeyStamper({
+//             apiPublicKey: '', // Placeholder, fill in later
+//             apiPrivateKey: '', // Placeholder, fill in later
+//           });
+//           break;
+//         default:
+//           stamper = await new PasskeyStamper({
+//             rpId: 'localhost',
+//           });
+//           break;
+//       }
 
-export const createSubOrg = async (params: ParamsType<'createSubOrg'>) => {
-  return jsonRpcRequest<
-    'createSubOrg',
-    TurnkeyApiTypes['v1CreateSubOrganizationIntentV7']
-  >('/turnkey', 'createSubOrg', params);
-};
+//       const client = new TurnkeyClient(
+//         { baseUrl: 'https://api.turnkey.com' },
+//         stamper
+//       );
+
+//       const signedRequest = await client.stampGetWhoami({
+//         organizationId,
+//       });
+
+//       const { url, body, stamp } = signedRequest;
+
+//       // Forward the signed request to the Turnkey API for validition
+//       const resp = await fetch(url, {
+//         method: 'POST',
+//         body,
+//         headers: {
+//           [stamp.stampHeaderName]: stamp.stampHeaderValue,
+//         },
+//       });
+
+//       console.log(resp);
+
+//       return signedRequest;
+//     },
+//   };
+// };

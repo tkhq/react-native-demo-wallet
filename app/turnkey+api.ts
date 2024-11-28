@@ -7,6 +7,7 @@ const turnkey = new Turnkey({
   apiPublicKey: process.env.TURNKEY_API_PUBLIC_KEY ?? '',
   apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY ?? '',
 }).apiClient();
+
 export async function POST(request: Request) {
   console.log('request', request);
   const body: JSONRPCRequest<MethodName> = await request.json();

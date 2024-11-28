@@ -36,10 +36,26 @@
         {
           "origin": "http://localhost:8081"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "http://localhost:8081"
+      },
+      "eas": {
+        "projectId": "2d9f416e-a769-4751-8924-bb31d9f65e02"
+      }
     }
   }
 }

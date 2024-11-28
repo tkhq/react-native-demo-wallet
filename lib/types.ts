@@ -1,4 +1,4 @@
-import { TurnkeyApiTypes } from '@turnkey/sdk-server';
+import { TSignedRequest, TurnkeyApiTypes } from '@turnkey/sdk-server';
 
 export type Attestation = TurnkeyApiTypes['v1Attestation'];
 
@@ -30,10 +30,15 @@ export type CreateSubOrgParams = {
   };
 };
 
+export type GetWhoamiParams = {
+  organizationId: string;
+};
+
 export type MethodParamsMap = {
   getSubOrgId: GetSubOrgIdParams;
   initOTPAuth: InitOtpAuthParams;
   createSubOrg: CreateSubOrgParams;
+  getWhoami: GetWhoamiParams;
 };
 
 export type MethodName = keyof MethodParamsMap;
@@ -44,3 +49,8 @@ export type JSONRPCRequest<M extends MethodName> = {
   method: M;
   params: ParamsType<M>;
 };
+
+export enum Authenticator {
+  APIKey = 'API_KEY',
+  Passkey = 'PASSKEY',
+}
