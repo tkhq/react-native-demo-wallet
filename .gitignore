@@ -42,3 +42,6 @@ expo-env.d.ts
 .vercel
 
 .env
+
+android/
+ios/

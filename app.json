@@ -34,14 +34,14 @@
       [
         "expo-router",
         {
-          "origin": "http://localhost:8081"
+          "origin": "https://3aa0-97-120-113-244.ngrok-free.app"
         }
       ],
       [
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 34
+            "compileSdkVersion": 35
           }
         }
       ]
