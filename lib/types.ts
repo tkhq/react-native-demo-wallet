@@ -81,3 +81,9 @@ export type User = {
     accounts: `0x${string}`[];
   }[];
 };
+
+export enum LoginMethod {
+  OtpAuth = 'OTP_AUTH',
+  Passkey = 'PASSKEY',
+  Email = 'EMAIL',
+}

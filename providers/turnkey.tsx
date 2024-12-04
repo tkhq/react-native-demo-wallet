@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSession } from '~/hooks/use-session';
 import { ApiKeyStamper } from '@turnkey/api-key-stamper';
-import { User } from '~/lib/types';
+import { LoginMethod, User } from '~/lib/types';
 import { getAddress } from 'viem';
 import { toast } from 'sonner-native';
 
@@ -17,6 +17,7 @@ export interface TurnkeyClientType {
   client: TurnkeyClient | undefined;
   login: LoginFunction;
   completeLogin: CompleteLoginFunction;
+  logout: () => Promise<void>;
   updateUser: ({
     email,
     phone,
@@ -26,18 +27,19 @@ export interface TurnkeyClientType {
   }) => Promise<void>;
   clearError: () => void;
   error: string | undefined;
-  loading: boolean;
+  loading: LoginMethod | undefined;
   user: User | undefined;
 }
 
 export const TurnkeyContext = createContext<TurnkeyClientType>({
   client: undefined,
   login: async () => Promise.resolve(),
+  logout: async () => Promise.resolve(),
   completeLogin: async () => Promise.resolve(),
   updateUser: async () => Promise.resolve(),
   clearError: () => {},
   error: undefined,
-  loading: false,
+  loading: undefined,
   user: undefined,
 });
 
@@ -48,19 +50,19 @@ interface TurnkeyProviderProps {
 // Define the overloads as a type
 type LoginFunction = {
   (
-    method: 'OTP_AUTH',
+    method: LoginMethod.OtpAuth,
     params: {
       otpType: 'OTP_TYPE_EMAIL' | 'OTP_TYPE_SMS';
       contact: string;
     }
   ): Promise<void>;
-  (method: 'PASSKEY', params: { email?: string }): Promise<void>;
-  (method: 'EMAIL', params: {}): Promise<void>;
+  (method: LoginMethod.Passkey, params: { email?: string }): Promise<void>;
+  (method: LoginMethod.Email, params: {}): Promise<void>;
 };
 
 type CompleteLoginFunction = {
   (
-    method: 'OTP_AUTH',
+    method: LoginMethod.OtpAuth,
     params: { otpId?: string; otpCode: string }
   ): Promise<void>;
 };
@@ -70,10 +72,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 }) => {
   const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
-  const { createEmbeddedKey, createSession, session } = useSession();
+  const { createEmbeddedKey, createSession, session, clearSession } =
+    useSession();
   // TODO: Refactor to useReducer, and set otpId for action INIT_OTP_AUTH
   const [otpId, setOtpId] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<LoginMethod | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [subOrgId, setSubOrgId] = useState<string | undefined>(undefined);
   const [user, setUser] = useState<User | undefined>(undefined);
@@ -213,7 +216,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
   const completeLogin: CompleteLoginFunction = async (method, params) => {
     console.log('completeLogin', method, params);
-    setLoading(true);
+    setLoading(method);
     setError(undefined);
     try {
       switch (method) {
@@ -246,7 +249,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       console.log('completeLogin', error);
       setError(errorMessage ?? 'Error please try again');
     } finally {
-      setLoading(false);
+      setLoading(undefined);
     }
   };
 
@@ -279,11 +282,17 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     setError(undefined);
   };
 
+  const logout = async () => {
+    await clearSession();
+    router.replace('/');
+  };
+
   return (
     <TurnkeyContext.Provider
       value={{
         client,
         login,
+        logout,
         completeLogin,
         updateUser,
         clearError,

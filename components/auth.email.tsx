@@ -15,6 +15,7 @@ function EmailInput({ onEmailChange }: EmailInputProps) {
 
   return (
     <Input
+      className="placeholder:text-sm placeholder:text-muted-foreground"
       autoCapitalize="none"
       autoComplete="email"
       autoCorrect={false}

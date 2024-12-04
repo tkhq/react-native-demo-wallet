@@ -24,6 +24,7 @@ export interface SessionContextType {
   session: Session | null;
   createEmbeddedKey: () => Promise<Hex>;
   createSession: (bundle: string, expiry?: number) => Promise<Session>;
+  clearSession: () => Promise<void>;
 }
 
 export const SessionContext = createContext<SessionContextType | undefined>(
@@ -147,6 +148,7 @@ export const SessionProvider: React.FC<{
         session,
         createEmbeddedKey,
         createSession,
+        clearSession,
       }}
     >
       {children}

@@ -1,28 +1,22 @@
 import * as React from 'react';
-import Animated, { FadeIn } from 'react-native-reanimated';
+
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Text } from '~/components/ui/text';
 import { Avatar, AvatarFallback } from './ui/avatar';
+
+import { useRouter } from 'expo-router';
+import { Drawer } from 'react-native-drawer-layout';
 import { useTurnkey } from '~/hooks/use-turnkey';
-import { truncateAddress } from '~/lib/utils';
-import { Link, useRouter } from 'expo-router';
 
 export function Account() {
-  const { user } = useTurnkey();
-  const address = user?.wallets[0].accounts[0];
+  const { logout } = useTurnkey();
   const router = useRouter();
   return (
     <DropdownMenu>
@@ -32,9 +26,7 @@ export function Account() {
           className="p-0 bg-none w-12 rounded-full web:hover:bg-none active:bg-none space-x-0"
         >
           <Avatar alt="Account Avatar">
-            <AvatarFallback>
-              <Text></Text>
-            </AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/50 to-primary/70"></AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -50,10 +42,29 @@ export function Account() {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onPress={logout}>
           <Text>Log out</Text>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function AccountDrawer() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Drawer
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      renderDrawerContent={() => {
+        return <Text>Drawer content</Text>;
+      }}
+    >
+      <Button onPress={() => setOpen((prevOpen) => !prevOpen)}>
+        <Text>Open drawer</Text>
+      </Button>
+    </Drawer>
   );
 }

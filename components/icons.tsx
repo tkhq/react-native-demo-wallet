@@ -1,7 +1,7 @@
 import { cssInterop } from 'nativewind';
 import React from 'react';
 import Svg, { G, Path, Defs, ClipPath, Rect, SvgProps } from 'react-native-svg';
-import { CopyIcon, LucideIcon } from 'lucide-react-native';
+import { CopyIcon, Loader, LucideIcon } from 'lucide-react-native';
 
 export type IconKeys = keyof typeof icons;
 
@@ -45,6 +45,7 @@ const icons = {
     },
   }),
   copy: iconWithClassName(CopyIcon),
+  loader: iconWithClassName(Loader),
 };
 
 export const Icons: IconsType = icons;

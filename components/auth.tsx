@@ -7,10 +7,13 @@ import OrSeparator from './or-separator';
 import { useTurnkey } from '~/hooks/use-turnkey';
 import { isSupported } from '@turnkey/react-native-passkey-stamper';
 import PhoneNumberInput from './auth.phone';
+import { LoginMethod } from '~/lib/types';
+
+import { LoaderButton } from './ui/loader-button';
 
 function Auth() {
   const [email, setEmail] = React.useState('');
-  const { login } = useTurnkey();
+  const { login, loading } = useTurnkey();
 
   const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail);
@@ -25,30 +28,44 @@ function Auth() {
   return (
     <View className="gap-6">
       <EmailInput onEmailChange={handleEmailChange} />
-      <Button
+      <LoaderButton
         variant="outline"
+        disabled={!!loading}
+        loading={loading === LoginMethod.OtpAuth}
         onPress={() =>
-          login('OTP_AUTH', { otpType: 'OTP_TYPE_EMAIL', contact: email })
+          login(LoginMethod.OtpAuth, {
+            otpType: 'OTP_TYPE_EMAIL',
+            contact: email,
+          })
         }
       >
         <Text>Continue with email</Text>
-      </Button>
+      </LoaderButton>
       {isSupported() ? (
-        <Button onPress={() => login('PASSKEY', { email })}>
+        <LoaderButton
+          disabled={!!loading}
+          loading={loading === LoginMethod.Passkey}
+          onPress={() => login(LoginMethod.Passkey, { email })}
+        >
           <Text>Continue with passkey</Text>
-        </Button>
+        </LoaderButton>
       ) : null}
       <OrSeparator />
 
       <PhoneNumberInput onPhoneChange={handlePhoneChange} />
-      <Button
+      <LoaderButton
         variant="outline"
+        disabled={!!loading}
+        loading={loading === LoginMethod.OtpAuth}
         onPress={() =>
-          login('OTP_AUTH', { otpType: 'OTP_TYPE_SMS', contact: phone })
+          login(LoginMethod.OtpAuth, {
+            otpType: 'OTP_TYPE_SMS',
+            contact: phone,
+          })
         }
       >
-        <Text>Continue with phone</Text>
-      </Button>
+        <Text className="">Continue with phone</Text>
+      </LoaderButton>
     </View>
   );
 }
