@@ -14,14 +14,48 @@ import { Platform } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '@rn-primitives/portal';
-import { ThemeToggle } from '~/components/ThemeToggle';
+import {
+  Inter_900Black,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+  Inter_300Light,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
 import { Providers } from '~/providers';
+import { Toaster } from 'sonner-native';
+import { Text } from '~/components/ui/text';
+
+import { Header } from '~/components/header';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
+  fonts: {
+    ...DefaultTheme.fonts,
+    regular: {
+      ...DefaultTheme.fonts.regular,
+      fontFamily: 'Inter_400Regular',
+    },
+    medium: {
+      ...DefaultTheme.fonts.medium,
+      fontFamily: 'Inter_500Medium',
+    },
+    bold: {
+      ...DefaultTheme.fonts.bold,
+      fontFamily: 'Inter_700Bold',
+      fontWeight: '700',
+    },
+    heavy: {
+      ...DefaultTheme.fonts.heavy,
+      fontFamily: 'Inter_800ExtraBold',
+    },
+  },
 };
+
 const DARK_THEME: Theme = {
   ...DarkTheme,
   colors: NAV_THEME.dark,
@@ -39,11 +73,21 @@ export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
+  // Load fonts
+  const [loaded, error] = useFonts({
+    Inter_900Black,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+    Inter_300Light,
+  });
+
   React.useEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem('theme');
       if (Platform.OS === 'web') {
-        // Adds the background color to the html element to prevent white background on overscroll.
         document.documentElement.classList.add('bg-background');
       }
       if (!theme) {
@@ -61,11 +105,13 @@ export default function RootLayout() {
       setAndroidNavigationBar('light');
       setIsColorSchemeLoaded(true);
     })().finally(() => {
-      SplashScreen.hideAsync();
+      if (loaded || error) {
+        SplashScreen.hideAsync();
+      }
     });
-  }, []);
+  }, [loaded, error]);
 
-  if (!isColorSchemeLoaded) {
+  if (!isColorSchemeLoaded || (!loaded && !error)) {
     return null;
   }
 
@@ -82,17 +128,42 @@ export default function RootLayout() {
           <Stack.Screen
             name="dashboard"
             options={{
-              title: 'Turnkey',
-              // headerRight: () => <ThemeToggle />,
-              headerStyle: {
-                backgroundColor: 'black',
-              },
-              headerTintColor: 'white',
+              header: () => <Header />,
+              title: '',
+            }}
+          />
+          <Stack.Screen
+            name="otp-auth"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{
+              header: () => <Header />,
+              title: '',
             }}
           />
         </Stack>
         <StatusBar backgroundColor="transparent" />
         <PortalHost />
+        <Toaster
+          position="top-center"
+          // offset={100}
+          duration={3000}
+          swipeToDismissDirection="up"
+          visibleToasts={4}
+          closeButton
+          autoWiggleOnUpdate="toast-change"
+          theme="light"
+          toastOptions={{
+            actionButtonStyle: {
+              paddingHorizontal: 20,
+            },
+          }}
+          pauseWhenPageIsHidden
+        />
       </ThemeProvider>
     </Providers>
   );

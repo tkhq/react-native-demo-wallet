@@ -44,6 +44,13 @@
             "compileSdkVersion": 35
           }
         }
+      ],
+      "expo-font",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
       ]
     ],
     "experiments": {
@@ -51,7 +58,7 @@
     },
     "extra": {
       "router": {
-        "origin": "http://localhost:8081"
+        "origin": "https://3aa0-97-120-113-244.ngrok-free.app"
       },
       "eas": {
         "projectId": "2d9f416e-a769-4751-8924-bb31d9f65e02"

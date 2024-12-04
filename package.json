@@ -14,9 +14,12 @@
     "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.2.3",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/avatar": "~1.1.0",
+    "@rn-primitives/dropdown-menu": "^1.1.0",
     "@rn-primitives/portal": "~1.1.0",
     "@rn-primitives/progress": "~1.1.0",
     "@rn-primitives/separator": "^1.1.0",
@@ -24,6 +27,7 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@turnkey/api-key-stamper": "^0.4.3",
+    "@turnkey/crypto": "^2.2.0",
     "@turnkey/http": "^2.16.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.0",
     "@turnkey/sdk-server": "^1.6.0",
@@ -31,11 +35,14 @@
     "clsx": "^2.1.0",
     "expo": "^52.0.7",
     "expo-build-properties": "~0.13.1",
+    "expo-crypto": "~14.0.1",
+    "expo-font": "~13.0.1",
     "expo-linear-gradient": "^14.0.1",
     "expo-linking": "~7.0.2",
     "expo-navigation-bar": "~4.0.3",
     "expo-router": "~4.0.5",
-    "expo-splash-screen": "~0.29.10",
+    "expo-secure-store": "~14.0.0",
+    "expo-splash-screen": "~0.29.13",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.3",
     "lucide-react-native": "^0.378.0",
@@ -43,6 +50,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "^0.76.3",
+    "react-native-gesture-handler": "~2.20.2",
     "react-native-otp-entry": "^1.7.3",
     "react-native-passkey": "^3.0.0",
     "react-native-passkeys": "^0.3.1",
@@ -51,9 +59,11 @@
     "react-native-screens": "^4.1.0",
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.13",
+    "sonner-native": "^0.16.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
+    "viem": "^2.21.53",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
@@ -62,5 +72,6 @@
     "@vercel/node": "^3.2.26",
     "typescript": "^5.3.3"
   },
-  "private": true
+  "private": true,
+  "packageManager": "pnpm@8.9.2+sha224.15f75bcfda405ef1634f73ca495f8e8e4280cf9a903e73bf62490060"
 }

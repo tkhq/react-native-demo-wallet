@@ -9,7 +9,7 @@ export async function GET(request: Request) {
         ],
         target: {
           namespace: 'android_app',
-          package_name: 'xyz.tkhqlabs.passkeyapp',
+          package_name: 'app.ngrok-free.3aa0-97-120-113-244',
           sha256_cert_fingerprints: [
             'A1:2A:66:04:CD:A8:7A:D4:65:8C:B5:0C:B4:76:53:8E:9A:B9:5E:7A:E7:A0:07:4E:DF:B4:6B:A2:BA:DE:49:3A',
           ],

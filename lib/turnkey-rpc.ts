@@ -1,6 +1,21 @@
 import { TurnkeyApiTypes } from '@turnkey/sdk-server';
 import { JSONRPCRequest, MethodName, ParamsType } from './types';
 
+interface TurnkeyRPCErrorDetails {
+  code: string;
+  message: string;
+}
+
+class TurnkeyRPCError extends Error implements TurnkeyRPCErrorDetails {
+  code: string;
+
+  constructor({ code, message }: TurnkeyRPCErrorDetails) {
+    super(message);
+    this.code = code;
+    this.name = 'TurnkeyRPCError';
+  }
+}
+
 export async function jsonRpcRequest<M extends MethodName, T>(
   method: M,
   params: ParamsType<M>
@@ -10,7 +25,7 @@ export async function jsonRpcRequest<M extends MethodName, T>(
     params,
   };
 
-  const response = await fetch('http://192.168.0.43:8081/turnkey', {
+  const response = await fetch('http://localhost:8081/turnkey', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -19,17 +34,23 @@ export async function jsonRpcRequest<M extends MethodName, T>(
   });
 
   if (!response.ok) {
-    throw new Error(`Error: ${response.statusText}`);
+    const { error } = await response.json();
+
+    throw new TurnkeyRPCError(error);
   }
 
   return response.json();
 }
 
-export const initOTPAuth = async (params: ParamsType<'initOTPAuth'>) => {
-  return jsonRpcRequest<'initOTPAuth', TurnkeyApiTypes['v1InitOtpAuthResult']>(
+export const initOTPAuth = async (
+  params: ParamsType<'initOTPAuth'>
+): Promise<
+  TurnkeyApiTypes['v1InitOtpAuthResult'] & { organizationId: string }
+> => {
+  return jsonRpcRequest<
     'initOTPAuth',
-    params
-  );
+    TurnkeyApiTypes['v1InitOtpAuthResult'] & { organizationId: string }
+  >('initOTPAuth', params);
 };
 
 export const getSubOrgId = async (params: ParamsType<'getSubOrgId'>) => {
@@ -51,6 +72,15 @@ export const createSubOrg = async (params: ParamsType<'createSubOrg'>) => {
 export const getWhoami = async (params: ParamsType<'getWhoami'>) => {
   return jsonRpcRequest<'getWhoami', TurnkeyApiTypes['v1GetWhoamiResponse']>(
     'getWhoami',
+    params
+  );
+};
+
+export const otpAuth = async (
+  params: ParamsType<'otpAuth'>
+): Promise<TurnkeyApiTypes['v1OtpAuthResult']> => {
+  return jsonRpcRequest<'otpAuth', TurnkeyApiTypes['v1OtpAuthResult']>(
+    'otpAuth',
     params
   );
 };

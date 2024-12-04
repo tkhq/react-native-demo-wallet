@@ -1,4 +1,5 @@
 import { TSignedRequest, TurnkeyApiTypes } from '@turnkey/sdk-server';
+import { Hex } from 'viem/_types/types/misc';
 
 export type Attestation = TurnkeyApiTypes['v1Attestation'];
 
@@ -34,11 +35,19 @@ export type GetWhoamiParams = {
   organizationId: string;
 };
 
+export type OtpAuthParams = {
+  otpId: string;
+  otpCode: string;
+  targetPublicKey: Hex;
+  organizationId: string;
+};
+
 export type MethodParamsMap = {
   getSubOrgId: GetSubOrgIdParams;
   initOTPAuth: InitOtpAuthParams;
   createSubOrg: CreateSubOrgParams;
   getWhoami: GetWhoamiParams;
+  otpAuth: OtpAuthParams;
 };
 
 export type MethodName = keyof MethodParamsMap;
@@ -54,3 +63,21 @@ export enum Authenticator {
   APIKey = 'API_KEY',
   Passkey = 'PASSKEY',
 }
+
+export type KeyPair = {
+  privateKey: Hex;
+  publicKey: Hex;
+};
+
+export type User = {
+  id: string;
+  userName?: string;
+  email?: string;
+  phoneNumber?: string;
+  organizationId: string;
+  wallets: {
+    name: string;
+    id: string;
+    accounts: `0x${string}`[];
+  }[];
+};
