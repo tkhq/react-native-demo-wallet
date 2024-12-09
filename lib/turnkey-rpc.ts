@@ -25,13 +25,16 @@ export async function jsonRpcRequest<M extends MethodName, T>(
     params,
   };
 
-  const response = await fetch('http://localhost:8081/turnkey', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  });
+  const response = await fetch(
+    'https://react-native-demo-wallet.vercel.app/turnkey',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    }
+  );
 
   if (!response.ok) {
     const { error } = await response.json();

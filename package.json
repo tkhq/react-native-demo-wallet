@@ -49,7 +49,7 @@
     "nativewind": "^4.1.23",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "^0.76.3",
+    "react-native": "0.76.3",
     "react-native-drawer-layout": "^4.0.4",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-otp-entry": "^1.7.3",
@@ -57,7 +57,7 @@
     "react-native-passkeys": "^0.3.1",
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
-    "react-native-screens": "^4.1.0",
+    "react-native-screens": "~4.1.0",
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.13",
     "sonner-native": "^0.16.1",
@@ -72,6 +72,9 @@
     "@types/react": "~18.3.12",
     "@vercel/node": "^3.2.26",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "private": true,
   "packageManager": "pnpm@8.9.2+sha224.15f75bcfda405ef1634f73ca495f8e8e4280cf9a903e73bf62490060"

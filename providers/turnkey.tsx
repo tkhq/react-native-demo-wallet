@@ -160,33 +160,15 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         throw new Error('Passkeys are not supported on this device');
       }
 
-      // const stamper = new PasskeyStamper({
-      //   rpId: 'localhost',
-      // });
-
-      // const client = new TurnkeyClient(
-      //   { baseUrl: 'https://api.turnkey.com' },
-      //   stamper
-      // );
-      // console.log('these');
-      // const signedRequest = await client.stampGetWhoami({
-      //   organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
-      // });
-      // console.log(signedRequest);
-      // const whoami = await stampGetWhoami(
-      //   process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? ''
-      // );
-      // console.log(whoami);
-      console.log('params', params);
       // ID isn't visible by users, but needs to be random enough and valid base64 (for Android)
-      const userId = 'lol'; // Buffer.from(String(Date.now())).toString('base64');
-      console.log(userId);
+      const userId = Buffer.from(String(Date.now())).toString('base64');
+
       const authenticatorParams = await createPasskey({
         // This doesn't matter much, it will be the name of the authenticator persisted on the Turnkey side.
         // Won't be visible by default.
         authenticatorName: 'End-User Passkey',
         rp: {
-          id: 'localhost',
+          id: 'react-native-demo-wallet.vercel.app',
           name: 'Passkey App',
         },
         user: {
@@ -202,14 +184,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       }).catch((error) => {
         console.log('error', error);
       });
-      console.log(authenticatorParams);
-      // const result = await createSubOrg({
-      //   email,
-      //   passkey: authenticatorParams,
-      // });
-      // console.log(result);
-    } else if (method === 'EMAIL') {
-      // Implement Email authentication logic here using the passkeyClient
     }
     return Promise.resolve();
   };
@@ -266,12 +240,19 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     };
 
     try {
-      await client.updateUser({
+      console.log('Updating user', {
         type: 'ACTIVITY_TYPE_UPDATE_USER',
         timestampMs: Date.now().toString(),
         organizationId: user.organizationId,
         parameters,
       });
+      const result = await client.updateUser({
+        type: 'ACTIVITY_TYPE_UPDATE_USER',
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters,
+      });
+      console.log('Update user result', result);
       toast.success('Info saved 🎉');
     } catch (error) {
       console.error('Failed to update user:', error);

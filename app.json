@@ -16,14 +16,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.reactnativedemowallet"
+      "bundleIdentifier": "app.vercel.react-native-demo-wallet"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.reactnativedemowallet"
+      "package": "app.vercel.reactnativedemowallet"
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +34,7 @@
       [
         "expo-router",
         {
-          "origin": "https://3aa0-97-120-113-244.ngrok-free.app"
+          "origin": "https://react-native-demo-wallet.vercel.app"
         }
       ],
       [
@@ -58,7 +58,7 @@
     },
     "extra": {
       "router": {
-        "origin": "https://3aa0-97-120-113-244.ngrok-free.app"
+        "origin": "https://react-native-demo-wallet.vercel.app"
       },
       "eas": {
         "projectId": "2d9f416e-a769-4751-8924-bb31d9f65e02"

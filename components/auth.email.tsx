@@ -3,10 +3,11 @@ import { Input } from '~/components/ui/input';
 
 interface EmailInputProps {
   onEmailChange: (email: string) => void;
+  initialValue?: string;
 }
 
-function EmailInput({ onEmailChange }: EmailInputProps) {
-  const [email, setEmail] = React.useState('');
+function EmailInput({ onEmailChange, initialValue }: EmailInputProps) {
+  const [email, setEmail] = React.useState(initialValue ?? '');
 
   const handleEmailChange = (text: string) => {
     setEmail(text);

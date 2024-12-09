@@ -6,10 +6,11 @@ import PhoneNumberInput from '~/components/auth.phone';
 import { ArrowLeft } from 'lucide-react-native';
 import { Link } from 'expo-router';
 import { useTurnkey } from '~/hooks/use-turnkey';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Icons } from '~/components/icons';
 
 const Settings = () => {
-  const { updateUser } = useTurnkey();
+  const { updateUser, user } = useTurnkey();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -17,16 +18,21 @@ const Settings = () => {
     await updateUser({ email, phone });
   };
 
+  useEffect(() => {
+    setEmail(user?.email ?? '');
+    setPhone(user?.phoneNumber ?? '');
+    console.log('user', user);
+  }, [user]);
+
   return (
     <View className="flex-1 p-5 gap-4">
-      <Link href="/dashboard">
-        <ArrowLeft className="fill-black" size={24} />
-      </Link>
-      <Text className="text-2xl font-bold">Settings</Text>
       <Text className="font-medium">Email</Text>
-      <EmailInput onEmailChange={setEmail} />
+      <EmailInput initialValue={user?.email} onEmailChange={setEmail} />
       <Text className="font-medium">Phone</Text>
-      <PhoneNumberInput onPhoneChange={setPhone} />
+      <PhoneNumberInput
+        initialValue={user?.phoneNumber}
+        onPhoneChange={setPhone}
+      />
       <Button onPress={handleUpdateUser}>
         <Text>Update</Text>
       </Button>

@@ -141,8 +141,7 @@ export default function RootLayout() {
           <Stack.Screen
             name="settings"
             options={{
-              header: () => <Header />,
-              title: '',
+              title: 'Settings',
             }}
           />
         </Stack>

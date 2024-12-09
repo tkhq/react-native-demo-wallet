@@ -3,7 +3,7 @@ import { TurnkeyClient } from '@turnkey/http';
 
 export const stampGetWhoami = async (organizationId: string) => {
   const stamper = new PasskeyStamper({
-    rpId: '3aa0-97-120-113-244.ngrok-free.app',
+    rpId: 'react-native-demo-wallet.vercel.app',
   });
 
   const client = new TurnkeyClient(
