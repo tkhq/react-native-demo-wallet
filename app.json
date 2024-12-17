@@ -16,6 +16,9 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
+      "associatedDomains": [
+        "webcredentials:react-native-demo-wallet.vercel.app"
+      ],
       "bundleIdentifier": "app.vercel.react-native-demo-wallet"
     },
     "android": {

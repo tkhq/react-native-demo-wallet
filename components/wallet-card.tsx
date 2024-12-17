@@ -1,7 +1,7 @@
 // wallet-card.js
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+// import * as Clipboard from '@react-native-clipboard/clipboard';
 
 import { formatEther } from 'viem';
 
@@ -25,21 +25,14 @@ export default function WalletCard() {
   const handleFundWallet = async () => {};
 
   const handleCopyAddress = () => {
-    Clipboard.setString(selectedAccount?.address || '');
+    // Clipboard.default.setString(selectedAccount?.address || '');
   };
-
-  const handleExportWallet = () => {};
-
-  const handleImportWallet = () => {};
 
   useEffect(() => {
     (async () => {
       if (user) {
-        console.log(user);
         const balance = await getBalance(user.wallets[0].accounts[0]);
-        console.log({ balance });
         const price = await getTokenPrice('ethereum');
-        console.log({ price });
         setSelectedAccount({
           address: user.wallets[0].accounts[0],
           balance: balance,
@@ -54,7 +47,7 @@ export default function WalletCard() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
         <CardTitle className="font-medium">Default Wallet</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-0">
+      <CardContent className="space-y-0 gap-2">
         {selectedAccount ? (
           <TouchableOpacity
             className="flex flex-row items-center gap-2 w-full"
@@ -71,7 +64,7 @@ export default function WalletCard() {
         ) : (
           <Skeleton className="h-12 w-12" />
         )}
-        <H3 className="text-4xl font-bold leading-loose h-12">
+        <H3 className="text-4xl font-bold">
           ${selectedAccount?.balanceUsd.toFixed(2)}{' '}
           <Muted className="ml-1">USD</Muted>
         </H3>

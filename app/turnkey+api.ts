@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         return Response.json({ error: 'Method not found' }, { status: 404 });
     }
   } catch (error: any) {
-    console.log('server error', { ...error }, JSON.stringify(error));
+    console.error('server error', { ...error }, JSON.stringify(error));
     if (error) {
       return Response.json(
         { error: error.message, code: error.code },
@@ -59,7 +59,7 @@ async function handleInitOtpAuth(params: ParamsType<'initOTPAuth'>) {
     filterType: otpType === 'OTP_TYPE_EMAIL' ? 'EMAIL' : 'PHONE_NUMBER',
     filterValue: contact,
   });
-  console.log('organizationIds', organizationIds);
+
   if (organizationIds.length > 0) {
     organizationId = organizationIds[0];
   }
@@ -74,7 +74,6 @@ async function handleInitOtpAuth(params: ParamsType<'initOTPAuth'>) {
 }
 
 async function handleOtpAuth(params: ParamsType<'otpAuth'>) {
-  console.log('otpAuth', params);
   const { otpId, otpCode, targetPublicKey, organizationId } = params;
 
   try {

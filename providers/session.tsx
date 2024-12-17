@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
 import { getPublicKey, decryptCredentialBundle } from '@turnkey/crypto';
 import { Hex, toHex } from 'viem';
 import { generateP256KeyPair } from '../lib/crypto';
-import { toast } from 'sonner-native';
+
 import { usePathname, useRouter } from 'expo-router';
 
 enum StorageKey {
@@ -40,17 +40,14 @@ export const SessionProvider: React.FC<{
 
   useEffect(() => {
     (async () => {
-      console.log('getting session');
       const session = await getSession();
-      console.log('session', session);
+
       if (session?.expiry && session.expiry > Date.now()) {
-        console.log('session found', session);
         setSession(session);
         if (pathname !== '/dashboard') {
           router.replace('/dashboard');
         }
       } else {
-        toast.error('Session expired');
         if (pathname === '/dashboard') {
           router.push('/');
         }

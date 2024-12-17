@@ -3,11 +3,9 @@ import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import EmailInput from '~/components/auth.email';
 import PhoneNumberInput from '~/components/auth.phone';
-import { ArrowLeft } from 'lucide-react-native';
-import { Link } from 'expo-router';
+
 import { useTurnkey } from '~/hooks/use-turnkey';
 import { useEffect, useState } from 'react';
-import { Icons } from '~/components/icons';
 
 const Settings = () => {
   const { updateUser, user } = useTurnkey();
@@ -21,8 +19,11 @@ const Settings = () => {
   useEffect(() => {
     setEmail(user?.email ?? '');
     setPhone(user?.phoneNumber ?? '');
-    console.log('user', user);
   }, [user]);
+
+  const onPhoneChange = (phone: string) => {
+    setPhone(phone);
+  };
 
   return (
     <View className="flex-1 p-5 gap-4">
@@ -31,7 +32,7 @@ const Settings = () => {
       <Text className="font-medium">Phone</Text>
       <PhoneNumberInput
         initialValue={user?.phoneNumber}
-        onPhoneChange={setPhone}
+        onPhoneChange={onPhoneChange}
       />
       <Button onPress={handleUpdateUser}>
         <Text>Update</Text>

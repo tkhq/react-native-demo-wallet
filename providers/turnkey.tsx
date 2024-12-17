@@ -136,8 +136,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
             wallets,
           });
         }
-
-        // router.push('/dashboard');
       })();
     }
   }, [session]);
@@ -145,11 +143,10 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const login: LoginFunction = async (
     method: 'OTP_AUTH' | 'PASSKEY' | 'EMAIL',
     params: any
-  ): Promise<void> => {
-    console.log('login', method, params);
+  ) => {
     if (method === 'OTP_AUTH') {
       const response = await turnkeyRPC.initOTPAuth(params);
-      console.log(response);
+
       if (response.otpId) {
         setOtpId(response.otpId);
         setSubOrgId(response.organizationId);
@@ -181,15 +178,18 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           requireResidentKey: true,
           userVerification: 'preferred',
         },
-      }).catch((error) => {
-        console.log('error', error);
       });
+
+      if (authenticatorParams) {
+        const result = await turnkeyRPC.createSubOrg({
+          email: params.email,
+          passkey: authenticatorParams,
+        });
+      }
     }
-    return Promise.resolve();
   };
 
   const completeLogin: CompleteLoginFunction = async (method, params) => {
-    console.log('completeLogin', method, params);
     setLoading(method);
     setError(undefined);
     try {
@@ -206,10 +206,10 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
             targetPublicKey,
             organizationId: subOrgId,
           });
-          console.log(result);
+
           if (result.credentialBundle) {
             const session = await createSession(result.credentialBundle);
-            console.log(session);
+
             router.replace('/dashboard');
           }
 
@@ -220,7 +220,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         5: 'Code expired. Please try again.',
         3: 'Invalid code. Please try again.',
       }[error?.code as number];
-      console.log('completeLogin', error);
+      console.error(error);
       setError(errorMessage ?? 'Error please try again');
     } finally {
       setLoading(undefined);
@@ -236,23 +236,18 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     const parameters = {
       userId: user.id,
       userTagIds: [],
-      ...userDetails,
+      userPhoneNumber: userDetails.phone,
+      userEmail: userDetails.email,
     };
 
     try {
-      console.log('Updating user', {
-        type: 'ACTIVITY_TYPE_UPDATE_USER',
-        timestampMs: Date.now().toString(),
-        organizationId: user.organizationId,
-        parameters,
-      });
       const result = await client.updateUser({
         type: 'ACTIVITY_TYPE_UPDATE_USER',
         timestampMs: Date.now().toString(),
         organizationId: user.organizationId,
         parameters,
       });
-      console.log('Update user result', result);
+
       toast.success('Info saved 🎉');
     } catch (error) {
       console.error('Failed to update user:', error);

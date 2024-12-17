@@ -14,7 +14,7 @@ export const stampGetWhoami = async (organizationId: string) => {
   const signedRequest = await client.stampGetWhoami({
     organizationId,
   });
-  console.log('signedRequest', signedRequest);
+
   const { url, body, stamp } = signedRequest;
 
   // Forward the signed request to the Turnkey API for validation
@@ -25,8 +25,6 @@ export const stampGetWhoami = async (organizationId: string) => {
       [stamp.stampHeaderName]: stamp.stampHeaderValue,
     },
   });
-
-  console.log(resp);
 
   return resp;
 };

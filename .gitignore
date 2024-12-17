@@ -43,7 +43,8 @@ expo-env.d.ts
 
 .env
 
-android/
-ios/
 
 *.keystore
+*.apk
+.idea/
+.vscode/

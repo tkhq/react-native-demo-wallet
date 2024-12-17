@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 
 import { Turnkey } from '~/lib/icons/Turnkey';
 import Auth from '~/components/auth';
 
-export default function Landing() {
+function Landing() {
+  const insets = useSafeAreaInsets();
   return (
-    <View className="flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
+    <View
+      style={{ flex: 1, paddingTop: insets.top }}
+      className="justify-center items-center gap-5 p-6 bg-secondary/30"
+    >
       <Card className="w-full max-w-sm ">
         <CardHeader className="items-center">
           <Turnkey className="" />
@@ -22,3 +27,5 @@ export default function Landing() {
     </View>
   );
 }
+
+export default Landing;
