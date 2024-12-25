@@ -1,5 +1,5 @@
-import { TSignedRequest, TurnkeyApiTypes } from '@turnkey/sdk-server';
-import { Hex } from 'viem/_types/types/misc';
+import { type TurnkeyApiTypes } from '@turnkey/sdk-server';
+import { type Hex } from 'viem';
 
 export type Attestation = TurnkeyApiTypes['v1Attestation'];
 
@@ -40,6 +40,9 @@ export type OtpAuthParams = {
   otpCode: string;
   targetPublicKey: Hex;
   organizationId: string;
+  apiKeyName?: string;
+  expirationSeconds?: string;
+  invalidateExisting?: boolean;
 };
 
 export type MethodParamsMap = {

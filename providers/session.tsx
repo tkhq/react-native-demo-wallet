@@ -6,13 +6,12 @@ import { Hex, toHex } from 'viem';
 import { generateP256KeyPair } from '../lib/crypto';
 
 import { usePathname, useRouter } from 'expo-router';
+import { OTP_AUTH_DEFAULT_EXPIRATION_SECONDS } from '~/lib/constants';
 
 enum StorageKey {
   EmbeddedKey = 'embedded-key',
   Session = 'session',
 }
-// In seconds: 900s = 15 minutes
-const DEFAULT_SESSION_EXPIRATION = 900;
 
 type Session = {
   publicKey: Hex;
@@ -95,7 +94,7 @@ export const SessionProvider: React.FC<{
    */
   const createSession = async (
     bundle: string,
-    expirySeconds: number = DEFAULT_SESSION_EXPIRATION
+    expirySeconds: number = OTP_AUTH_DEFAULT_EXPIRATION_SECONDS
   ): Promise<Session> => {
     const embeddedKey = await getEmbeddedKey();
     if (!embeddedKey) {
