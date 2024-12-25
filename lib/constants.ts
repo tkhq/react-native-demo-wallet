@@ -16,3 +16,5 @@ export const NAV_THEME = {
     text: 'hsl(0 0% 98%)', // foreground
   },
 };
+
+export const OTP_AUTH_DEFAULT_EXPIRATION_SECONDS = 15 * 60;

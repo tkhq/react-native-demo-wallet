@@ -12,6 +12,7 @@ import { ApiKeyStamper } from '@turnkey/api-key-stamper';
 import { LoginMethod, User } from '~/lib/types';
 import { getAddress } from 'viem';
 import { toast } from 'sonner-native';
+import { OTP_AUTH_DEFAULT_EXPIRATION_SECONDS } from '~/lib/constants';
 
 export interface TurnkeyClientType {
   client: TurnkeyClient | undefined;
@@ -205,10 +206,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
             otpCode: params.otpCode,
             targetPublicKey,
             organizationId: subOrgId,
+            expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           });
 
           if (result.credentialBundle) {
-            const session = await createSession(result.credentialBundle);
+            await createSession(result.credentialBundle);
 
             router.replace('/dashboard');
           }
