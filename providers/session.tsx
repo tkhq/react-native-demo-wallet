@@ -21,7 +21,7 @@ type Session = {
 
 export interface SessionContextType {
   session: Session | null;
-  createEmbeddedKey: () => Promise<Hex>;
+  createEmbeddedKey: () => Promise<string>;
   createSession: (bundle: string, expiry?: number) => Promise<Session>;
   clearSession: () => Promise<void>;
 }
@@ -60,7 +60,7 @@ export const SessionProvider: React.FC<{
    */
   const createEmbeddedKey = async () => {
     const key = await generateP256KeyPair();
-    // Remove the 0x prefix from the private key
+    // Remove the 0x prefix from the private and public key
     const embeddedPrivateKey = key.privateKey.slice(2);
     const publicKey = key.publicKey.slice(2);
 

@@ -90,6 +90,7 @@ async function handleOtpAuth(params: ParamsType<"otpAuth">) {
   const {
     otpId,
     otpCode,
+    organizationId,
     targetPublicKey,
     expirationSeconds,
     invalidateExisting,
@@ -99,6 +100,7 @@ async function handleOtpAuth(params: ParamsType<"otpAuth">) {
     const result = await turnkey.otpAuth({
       otpId,
       otpCode,
+      organizationId,
       targetPublicKey,
       expirationSeconds,
       invalidateExisting,

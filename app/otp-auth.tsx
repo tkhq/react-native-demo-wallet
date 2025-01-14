@@ -24,6 +24,7 @@ const OTPAuth = () => {
 
   const searchParams = useSearchParams();
   const otpId = searchParams.get('otpId') ?? '';
+  const organizationId = searchParams.get('organizationId') ?? '';
 
   useEffect(() => {
     if (state.error) {
@@ -74,7 +75,7 @@ const OTPAuth = () => {
           <Button
             className="flex-1"
             disabled={otpCode.length !== 6}
-            onPress={() => completeEmailAuth({ otpId, otpCode })}
+            onPress={() => completeEmailAuth({ otpId, otpCode, organizationId })}
           >
             <Text>Continue</Text>
           </Button>

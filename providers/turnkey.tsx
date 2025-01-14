@@ -74,6 +74,7 @@ export interface TurnkeyClientType {
   completeEmailAuth: (params: {
     otpId: string;
     otpCode: string;
+    organizationId: string;
   }) => Promise<void>;
   loginWithPasskey: () => Promise<void>;
   logout: () => Promise<void>;
@@ -111,8 +112,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (response) {
         dispatch({ type: "INIT_EMAIL_AUTH" });
-        console.log("otpId ", response.otpId);
-        router.push(`/otp-auth?otpId=${encodeURIComponent(response.otpId)}`);
+        router.push(`/otp-auth?otpId=${encodeURIComponent(response.otpId)}&organizationId=${encodeURIComponent(response.organizationId)}`);
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -124,29 +124,27 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const completeEmailAuth = async ({
     otpId,
     otpCode,
+    organizationId,
   }: {
     otpId: string;
     otpCode: string;
+    organizationId: string;
   }) => {
-    console.log("otpId ", otpId);
     if (otpCode) {
       dispatch({ type: "LOADING", payload: LoginMethod.Email });
       try {
         // TODO: check if user has suborgId
         const targetPublicKey = await createEmbeddedKey();
 
-        console.log("targetPublicKey ", targetPublicKey);
-
         // I removed organizationId from here, not sure if its needed - might be issue later on
         const result = await turnkeyRPC.otpAuth({
           otpId: otpId,
           otpCode: otpCode,
+          organizationId: organizationId,
           targetPublicKey,
           expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
-
-        console.log("result ", result);
 
         if (result.credentialBundle) {
           await createSession(result.credentialBundle);

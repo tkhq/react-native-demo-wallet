@@ -38,7 +38,8 @@ export type GetWhoamiParams = {
 export type OtpAuthParams = {
   otpId: string;
   otpCode: string;
-  targetPublicKey: Hex;
+  organizationId: string;
+  targetPublicKey: string;
   apiKeyName?: string;
   expirationSeconds?: string;
   invalidateExisting?: boolean;
