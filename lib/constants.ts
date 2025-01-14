@@ -17,4 +17,9 @@ export const NAV_THEME = {
   },
 };
 
+export const TURNKEY_PARENT_ORG_ID =
+  process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "";
+export const TURNKEY_RP_ID = process.env.EXPO_PUBLIC_TURNKEY_RP_ID ?? "";
+export const TURNKEY_API_URL = process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? "";
 export const OTP_AUTH_DEFAULT_EXPIRATION_SECONDS = 15 * 60;
+

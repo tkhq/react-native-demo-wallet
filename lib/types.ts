@@ -23,7 +23,7 @@ export type InitOtpAuthParams = {
 };
 
 export type CreateSubOrgParams = {
-  email: Email;
+  email?: Email;
   passkey?: {
     name?: string;
     challenge: string;
@@ -39,7 +39,6 @@ export type OtpAuthParams = {
   otpId: string;
   otpCode: string;
   targetPublicKey: Hex;
-  organizationId: string;
   apiKeyName?: string;
   expirationSeconds?: string;
   invalidateExisting?: boolean;

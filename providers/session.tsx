@@ -62,7 +62,7 @@ export const SessionProvider: React.FC<{
     const key = await generateP256KeyPair();
     // Remove the 0x prefix from the private key
     const embeddedPrivateKey = key.privateKey.slice(2);
-    const publicKey = key.publicKey;
+    const publicKey = key.publicKey.slice(2);
 
     await saveEmbeddedKey(embeddedPrivateKey);
 

@@ -1,282 +1,226 @@
-import { ReactNode, createContext, useEffect, useState } from 'react';
-import { TurnkeyClient } from '@turnkey/http';
-import * as turnkeyRPC from '~/lib/turnkey-rpc';
+import {
+  ReactNode,
+  createContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
+import { TurnkeyClient } from "@turnkey/http";
+import * as turnkeyRPC from "~/lib/turnkey-rpc";
 
 import {
   createPasskey,
   isSupported,
-} from '@turnkey/react-native-passkey-stamper';
-import { useRouter } from 'expo-router';
-import { useSession } from '~/hooks/use-session';
-import { ApiKeyStamper } from '@turnkey/api-key-stamper';
-import { LoginMethod, User } from '~/lib/types';
-import { getAddress } from 'viem';
-import { toast } from 'sonner-native';
-import { OTP_AUTH_DEFAULT_EXPIRATION_SECONDS } from '~/lib/constants';
+  PasskeyStamper,
+} from "@turnkey/react-native-passkey-stamper";
+import { useRouter } from "expo-router";
+import { useSession } from "~/hooks/use-session";
+import { ApiKeyStamper } from "@turnkey/api-key-stamper";
+import { Email, LoginMethod, User } from "~/lib/types";
+import { getAddress } from "viem";
+import { toast } from "sonner-native";
+import { OTP_AUTH_DEFAULT_EXPIRATION_SECONDS, TURNKEY_API_URL, TURNKEY_PARENT_ORG_ID, TURNKEY_RP_ID } from "~/lib/constants";
+
+
+
+type AuthActionType =
+  | { type: "PASSKEY"; payload: User }
+  | { type: "INIT_EMAIL_AUTH" }
+  | { type: "COMPLETE_EMAIL_AUTH"; payload: User }
+  | { type: "EMAIL_RECOVERY"; payload: User }
+  | { type: "WALLET_AUTH"; payload: User }
+  | { type: "OAUTH"; payload: User }
+  | { type: "LOADING"; payload: LoginMethod | null }
+  | { type: "ERROR"; payload: string }
+  | { type: "CLEAR_ERROR" };
+interface AuthState {
+  loading: LoginMethod | null;
+  error: string;
+  user: User | null;
+}
+
+const initialState: AuthState = {
+  loading: null,
+  error: "",
+  user: null,
+};
+
+function authReducer(state: AuthState, action: AuthActionType): AuthState {
+  switch (action.type) {
+    case "LOADING":
+      return { ...state, loading: action.payload ? action.payload : null };
+    case "ERROR":
+      return { ...state, error: action.payload, loading: null };
+    case "CLEAR_ERROR":
+      return { ...state, error: "" };
+    case "INIT_EMAIL_AUTH":
+      return { ...state, loading: null, error: "" };
+    case "COMPLETE_EMAIL_AUTH":
+      return { ...state, user: action.payload, loading: null, error: "" };
+    case "PASSKEY":
+    case "EMAIL_RECOVERY":
+    case "WALLET_AUTH":
+    case "OAUTH":
+      return { ...state, user: action.payload, loading: null, error: "" };
+    default:
+      return state;
+  }
+}
+
 
 export interface TurnkeyClientType {
-  client: TurnkeyClient | undefined;
-  login: LoginFunction;
-  completeLogin: CompleteLoginFunction;
-  logout: () => Promise<void>;
-  updateUser: ({
-    email,
-    phone,
-  }: {
-    email?: string;
-    phone?: string;
+  state: AuthState;
+  initEmailLogin: (email: Email) => Promise<void>;
+  completeEmailAuth: (params: {
+    otpId: string;
+    otpCode: string;
   }) => Promise<void>;
+  loginWithPasskey: () => Promise<void>;
+  logout: () => Promise<void>;
   clearError: () => void;
-  error: string | undefined;
-  loading: LoginMethod | undefined;
-  user: User | undefined;
 }
 
 export const TurnkeyContext = createContext<TurnkeyClientType>({
-  client: undefined,
-  login: async () => Promise.resolve(),
+  state: initialState,
+  initEmailLogin: async () => Promise.resolve(),
+  completeEmailAuth: async () => Promise.resolve(),
+  loginWithPasskey: async () => Promise.resolve(),
   logout: async () => Promise.resolve(),
-  completeLogin: async () => Promise.resolve(),
-  updateUser: async () => Promise.resolve(),
   clearError: () => {},
-  error: undefined,
-  loading: undefined,
-  user: undefined,
 });
 
 interface TurnkeyProviderProps {
   children: ReactNode;
 }
 
-// Define the overloads as a type
-type LoginFunction = {
-  (
-    method: LoginMethod.OtpAuth,
-    params: {
-      otpType: 'OTP_TYPE_EMAIL' | 'OTP_TYPE_SMS';
-      contact: string;
-    }
-  ): Promise<void>;
-  (method: LoginMethod.Passkey, params: { email?: string }): Promise<void>;
-  (method: LoginMethod.Email, params: {}): Promise<void>;
-};
-
-type CompleteLoginFunction = {
-  (
-    method: LoginMethod.OtpAuth,
-    params: { otpId?: string; otpCode: string }
-  ): Promise<void>;
-};
-
 export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   children,
 }) => {
-  const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
+  const [state, dispatch] = useReducer(authReducer, initialState);
   const router = useRouter();
   const { createEmbeddedKey, createSession, session, clearSession } =
     useSession();
-  // TODO: Refactor to useReducer, and set otpId for action INIT_OTP_AUTH
-  const [otpId, setOtpId] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState<LoginMethod | undefined>(undefined);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [subOrgId, setSubOrgId] = useState<string | undefined>(undefined);
-  const [user, setUser] = useState<User | undefined>(undefined);
 
-  useEffect(() => {
-    if (session) {
-      (async () => {
-        const stamper = new ApiKeyStamper({
-          apiPrivateKey: session.privateKey,
-          apiPublicKey: session.publicKey.slice(2),
-        });
-        const client = new TurnkeyClient(
-          { baseUrl: 'https://api.turnkey.com' },
-          stamper
-        );
-        setClient(client);
-
-        const whoami = await client.getWhoami({
-          organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
-        });
-
-        if (whoami.userId && whoami.organizationId) {
-          const [walletsResponse, userResponse] = await Promise.all([
-            client.getWallets({
-              organizationId: whoami.organizationId,
-            }),
-            client.getUser({
-              organizationId: whoami.organizationId,
-              userId: whoami.userId,
-            }),
-          ]);
-
-          const wallets = await Promise.all(
-            walletsResponse.wallets.map(async (wallet) => {
-              const accounts = await client.getWalletAccounts({
-                organizationId: whoami.organizationId,
-                walletId: wallet.walletId,
-              });
-              return {
-                name: wallet.walletName,
-                id: wallet.walletId,
-                accounts: accounts.accounts.map((account) =>
-                  getAddress(account.address)
-                ),
-              };
-            })
-          );
-
-          const user = userResponse.user;
-
-          setUser({
-            id: user.userId,
-            userName: user.userName,
-            email: user.userEmail,
-            phoneNumber: user.userPhoneNumber,
-            organizationId: whoami.organizationId,
-            wallets,
-          });
-        }
-      })();
-    }
-  }, [session]);
-
-  const login: LoginFunction = async (
-    method: 'OTP_AUTH' | 'PASSKEY' | 'EMAIL',
-    params: any
-  ) => {
-    if (method === 'OTP_AUTH') {
-      const response = await turnkeyRPC.initOTPAuth(params);
-
-      if (response.otpId) {
-        setOtpId(response.otpId);
-        setSubOrgId(response.organizationId);
-        router.push('/otp-auth');
-      }
-    } else if (method === 'PASSKEY') {
-      if (!isSupported()) {
-        throw new Error('Passkeys are not supported on this device');
-      }
-
-      // ID isn't visible by users, but needs to be random enough and valid base64 (for Android)
-      const userId = Buffer.from(String(Date.now())).toString('base64');
-
-      const authenticatorParams = await createPasskey({
-        // This doesn't matter much, it will be the name of the authenticator persisted on the Turnkey side.
-        // Won't be visible by default.
-        authenticatorName: 'End-User Passkey',
-        rp: {
-          id: 'react-native-demo-wallet.vercel.app',
-          name: 'Passkey App',
-        },
-        user: {
-          id: userId,
-          name: `User ${new Date().toISOString()}`,
-          displayName: `User ${new Date().toISOString()}`,
-        },
-        authenticatorSelection: {
-          residentKey: 'required',
-          requireResidentKey: true,
-          userVerification: 'preferred',
-        },
+  const initEmailLogin = async (email: Email) => {
+    dispatch({ type: "LOADING", payload: LoginMethod.Email });
+    try {
+      const response = await turnkeyRPC.initOTPAuth({
+        otpType: "OTP_TYPE_EMAIL",
+        contact: email,
       });
 
-      if (authenticatorParams) {
-        const result = await turnkeyRPC.createSubOrg({
-          email: params.email,
-          passkey: authenticatorParams,
-        });
-      }
-    }
-  };
-
-  const completeLogin: CompleteLoginFunction = async (method, params) => {
-    setLoading(method);
-    setError(undefined);
-    try {
-      switch (method) {
-        case 'OTP_AUTH':
-          if (!subOrgId) {
-            throw new Error('Sub-organization ID not set');
-          }
-          const targetPublicKey = await createEmbeddedKey();
-
-          const result = await turnkeyRPC.otpAuth({
-            otpId: otpId ?? params.otpId ?? '',
-            otpCode: params.otpCode,
-            targetPublicKey,
-            organizationId: subOrgId,
-            expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
-          });
-
-          if (result.credentialBundle) {
-            await createSession(result.credentialBundle);
-
-            router.replace('/dashboard');
-          }
-
-          break;
+      if (response) {
+        dispatch({ type: "INIT_EMAIL_AUTH" });
+        console.log("otpId ", response.otpId);
+        router.push(`/otp-auth?otpId=${encodeURIComponent(response.otpId)}`);
       }
     } catch (error: any) {
-      const errorMessage = {
-        5: 'Code expired. Please try again.',
-        3: 'Invalid code. Please try again.',
-      }[error?.code as number];
-      console.error(error);
-      setError(errorMessage ?? 'Error please try again');
+      dispatch({ type: "ERROR", payload: error.message });
     } finally {
-      setLoading(undefined);
+      dispatch({ type: "LOADING", payload: null });
     }
   };
 
-  const updateUser = async (userDetails: {
-    email?: string;
-    phone?: string;
+  const completeEmailAuth = async ({
+    otpId,
+    otpCode,
+  }: {
+    otpId: string;
+    otpCode: string;
   }) => {
-    if (!client || !user) return;
+    console.log("otpId ", otpId);
+    if (otpCode) {
+      dispatch({ type: "LOADING", payload: LoginMethod.Email });
+      try {
+        // TODO: check if user has suborgId
+        const targetPublicKey = await createEmbeddedKey();
 
-    const parameters = {
-      userId: user.id,
-      userTagIds: [],
-      userPhoneNumber: userDetails.phone,
-      userEmail: userDetails.email,
-    };
+        console.log("targetPublicKey ", targetPublicKey);
+
+        // I removed organizationId from here, not sure if its needed - might be issue later on
+        const result = await turnkeyRPC.otpAuth({
+          otpId: otpId,
+          otpCode: otpCode,
+          targetPublicKey,
+          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
+          invalidateExisting: false,
+        });
+
+        console.log("result ", result);
+
+        if (result.credentialBundle) {
+          await createSession(result.credentialBundle);
+          router.push("/dashboard");
+        }
+      } catch (error: any) {
+        dispatch({ type: "ERROR", payload: error.message });
+      } finally {
+        dispatch({ type: "LOADING", payload: null });
+      }
+    }
+  };
+
+  const loginWithPasskey = async () => {
+    if (!isSupported()) {
+      throw new Error("Passkeys are not supported on this device");
+    }
+    dispatch({ type: "LOADING", payload: LoginMethod.Passkey });
 
     try {
-      const result = await client.updateUser({
-        type: 'ACTIVITY_TYPE_UPDATE_USER',
-        timestampMs: Date.now().toString(),
-        organizationId: user.organizationId,
-        parameters,
+      const stamper = new PasskeyStamper({
+        rpId: TURNKEY_RP_ID,
       });
 
-      toast.success('Info saved 🎉');
-    } catch (error) {
-      console.error('Failed to update user:', error);
-    }
-  };
+      const httpClient = new TurnkeyClient(
+        { baseUrl: TURNKEY_API_URL },
+        stamper
+      );
 
-  const clearError = () => {
-    setError(undefined);
+      const targetPublicKey = await createEmbeddedKey();
+
+      const sessionResponse = await httpClient.createReadWriteSession({
+        type: "ACTIVITY_TYPE_CREATE_READ_WRITE_SESSION_V2",
+        timestampMs: Date.now().toString(),
+        organizationId: TURNKEY_PARENT_ORG_ID,
+        parameters: {
+          targetPublicKey,
+        },
+      });
+
+      const credentialBundle =
+        sessionResponse.activity.result.createReadWriteSessionResultV2
+          ?.credentialBundle;
+
+      if (credentialBundle) {
+        await createSession(credentialBundle);
+        router.push("/dashboard");
+      }
+      router.push("/dashboard");
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+    } finally {
+      dispatch({ type: "LOADING", payload: null });
+    }
   };
 
   const logout = async () => {
     await clearSession();
-    router.replace('/');
+    router.replace("/");
+  };
+
+  const clearError = () => {
+    dispatch({ type: "CLEAR_ERROR" });
   };
 
   return (
     <TurnkeyContext.Provider
       value={{
-        client,
-        login,
+        state,
+        initEmailLogin,
+        completeEmailAuth,
+        loginWithPasskey,
         logout,
-        completeLogin,
-        updateUser,
         clearError,
-        error,
-        loading,
-        user,
       }}
     >
       {children}
