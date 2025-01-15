@@ -70,7 +70,7 @@ export const getSubOrgId = async (params: ParamsType<'getSubOrgId'>) => {
 export const createSubOrg = async (params: ParamsType<'createSubOrg'>) => {
   return jsonRpcRequest<
     'createSubOrg',
-    TurnkeyApiTypes['v1CreateSubOrganizationIntentV7']
+    TurnkeyApiTypes['v1CreateSubOrganizationResultV7']
   >('createSubOrg', params);
 };
 

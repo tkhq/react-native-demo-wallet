@@ -21,7 +21,7 @@ const isValidEmail = (email: string) => {
 
 function Auth() {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, loginWithPasskey } = useTurnkey();
+  const { state, initEmailLogin, signUpWithPasskey, loginWithPasskey } = useTurnkey();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -81,7 +81,7 @@ function Auth() {
                 >
                   <Text>Log in with passkey</Text>
                 </LoaderButton>
-                <BaseButton onPress={() => loginWithPasskey()}>
+                <BaseButton onPress={() => signUpWithPasskey()}>
                   <View className="flex flex-col justify-center items-center">
                     <Text className="text-base font-semibold text-blue-700">
                       Sign up with passkey

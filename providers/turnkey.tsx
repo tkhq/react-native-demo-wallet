@@ -1,9 +1,4 @@
-import {
-  ReactNode,
-  createContext,
-  useReducer,
-  useState,
-} from "react";
+import { ReactNode, createContext, useReducer, useState } from "react";
 import { TurnkeyClient } from "@turnkey/http";
 import * as turnkeyRPC from "~/lib/turnkey-rpc";
 import {
@@ -17,9 +12,12 @@ import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import { Email, LoginMethod, User } from "~/lib/types";
 import { getAddress } from "viem";
 import { toast } from "sonner-native";
-import { OTP_AUTH_DEFAULT_EXPIRATION_SECONDS, TURNKEY_API_URL, TURNKEY_PARENT_ORG_ID, TURNKEY_RP_ID } from "~/lib/constants";
-
-
+import {
+  OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
+  TURNKEY_API_URL,
+  TURNKEY_PARENT_ORG_ID,
+  TURNKEY_RP_ID,
+} from "~/lib/constants";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -65,7 +63,6 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
   }
 }
 
-
 export interface TurnkeyClientType {
   state: AuthState;
   initEmailLogin: (email: Email) => Promise<void>;
@@ -74,6 +71,7 @@ export interface TurnkeyClientType {
     otpCode: string;
     organizationId: string;
   }) => Promise<void>;
+  signUpWithPasskey: () => Promise<void>;
   loginWithPasskey: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -83,6 +81,7 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   state: initialState,
   initEmailLogin: async () => Promise.resolve(),
   completeEmailAuth: async () => Promise.resolve(),
+  signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
   logout: async () => Promise.resolve(),
   clearError: () => {},
@@ -110,7 +109,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (response) {
         dispatch({ type: "INIT_EMAIL_AUTH" });
-        router.push(`/otp-auth?otpId=${encodeURIComponent(response.otpId)}&organizationId=${encodeURIComponent(response.organizationId)}`);
+        router.push(
+          `/otp-auth?otpId=${encodeURIComponent(
+            response.otpId
+          )}&organizationId=${encodeURIComponent(response.organizationId)}`
+        );
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -133,7 +136,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       try {
         const targetPublicKey = await createEmbeddedKey();
 
-        const result = await turnkeyRPC.otpAuth({
+        const response = await turnkeyRPC.otpAuth({
           otpId: otpId,
           otpCode: otpCode,
           organizationId: organizationId,
@@ -142,8 +145,8 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           invalidateExisting: false,
         });
 
-        if (result.credentialBundle) {
-          await createSession(result.credentialBundle);
+        if (response.credentialBundle) {
+          await createSession(response.credentialBundle);
           router.push("/dashboard");
         }
       } catch (error: any) {
@@ -151,6 +154,81 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       } finally {
         dispatch({ type: "LOADING", payload: null });
       }
+    }
+  };
+
+  // User will be prompted twice for passkey, once for account creation and once for login
+  // TODO: check if there's a better way to handle this
+  const signUpWithPasskey = async () => {
+    console.log("signUpWithPasskey called");
+    if (!isSupported()) {
+      throw new Error("Passkeys are not supported on this device");
+    }
+    console.log("passkey supported");
+
+    dispatch({ type: "LOADING", payload: LoginMethod.Passkey });
+
+    try {
+      console.log("creating passkey");
+      const authenticatorParams = await createPasskey({
+        authenticatorName: "End-User Passkey",
+        rp: {
+          id: "localhost", //TODO: Change this to your site's domain
+          name: "Local Test App", //TODO: Change this to your app's name
+        },
+        user: {
+          id: String(Date.now()),
+          // Name and displayName must match
+          // This name is visible to the user. This is what's shown in the passkey prompt
+          name: "Test User",
+          displayName: "Test User",
+        },
+      });
+      
+      console.log("created passkey");
+
+      const response = await turnkeyRPC.createSubOrg({
+        passkey: {
+          challenge: authenticatorParams.challenge,
+          attestation: authenticatorParams.attestation,
+        },
+      });
+
+      if (response.subOrganizationId) {
+        // Successfully created sub-organization, proceed with the login flow
+        const stamper = new PasskeyStamper({
+          rpId: TURNKEY_RP_ID,
+        });
+
+        const httpClient = new TurnkeyClient(
+          { baseUrl: TURNKEY_API_URL },
+          stamper
+        );
+
+        const targetPublicKey = await createEmbeddedKey();
+
+        const sessionResponse = await httpClient.createReadWriteSession({
+          type: "ACTIVITY_TYPE_CREATE_READ_WRITE_SESSION_V2",
+          timestampMs: Date.now().toString(),
+          organizationId: TURNKEY_PARENT_ORG_ID,
+          parameters: {
+            targetPublicKey,
+          },
+        });
+
+        const credentialBundle =
+          sessionResponse.activity.result.createReadWriteSessionResultV2
+            ?.credentialBundle;
+
+        if (credentialBundle) {
+          await createSession(credentialBundle);
+          router.push("/dashboard");
+        }
+      }
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+    } finally {
+      dispatch({ type: "LOADING", payload: null });
     }
   };
 
@@ -189,7 +267,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         await createSession(credentialBundle);
         router.push("/dashboard");
       }
-      router.push("/dashboard");
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
     } finally {
@@ -212,6 +289,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         state,
         initEmailLogin,
         completeEmailAuth,
+        signUpWithPasskey,
         loginWithPasskey,
         logout,
         clearError,
