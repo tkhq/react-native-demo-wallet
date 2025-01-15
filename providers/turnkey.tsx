@@ -1,13 +1,11 @@
 import {
   ReactNode,
   createContext,
-  useEffect,
   useReducer,
   useState,
 } from "react";
 import { TurnkeyClient } from "@turnkey/http";
 import * as turnkeyRPC from "~/lib/turnkey-rpc";
-
 import {
   createPasskey,
   isSupported,
@@ -133,10 +131,8 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     if (otpCode) {
       dispatch({ type: "LOADING", payload: LoginMethod.Email });
       try {
-        // TODO: check if user has suborgId
         const targetPublicKey = await createEmbeddedKey();
 
-        // I removed organizationId from here, not sure if its needed - might be issue later on
         const result = await turnkeyRPC.otpAuth({
           otpId: otpId,
           otpCode: otpCode,

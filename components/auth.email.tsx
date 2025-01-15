@@ -11,13 +11,12 @@ function EmailInput({ onEmailChange, initialValue }: EmailInputProps) {
 
   const handleEmailChange = (text: string) => {
     setEmail(text);
-    onEmailChange(text); // Call the callback function with the new email value
+    onEmailChange(text);
   };
 
   return (
     <Input
-      className="placeholder:text-sm placeholder:text-muted-foreground"
-      autoCapitalize="none"
+    autoCapitalize="none"
       autoComplete="email"
       autoCorrect={false}
       keyboardType="email-address"
