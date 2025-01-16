@@ -21,7 +21,7 @@ const isValidEmail = (email: string) => {
 
 function Auth() {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, signUpWithPasskey, loginWithPasskey } = useTurnkey();
+  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey } = useTurnkey();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -50,7 +50,7 @@ function Auth() {
             <LoaderButton
               variant="outline"
               disabled={!!state.loading || !isValidEmail(email)}
-              loading={state.loading === LoginMethod.OtpAuth}
+              loading={state.loading === LoginMethod.Email}
               onPress={() => initEmailLogin(email as Email)}
               className={cn("rounded-xl", {
                 "border-black": isValidEmail(email),
@@ -63,8 +63,8 @@ function Auth() {
             <LoaderButton
               variant="outline"
               disabled={!!state.loading || phone.length < 12}
-              loading={state.loading === LoginMethod.OtpAuth}
-              onPress={() => initEmailLogin(email as Email)}
+              loading={state.loading === LoginMethod.Phone}
+              onPress={() => initPhoneLogin(phone)}
               className={cn("rounded-xl", { "border-black": phone.length === 12 })}
             >
               <Text>Continue</Text>

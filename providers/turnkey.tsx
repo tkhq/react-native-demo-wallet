@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useReducer, useState } from "react";
+import { ReactNode, createContext, useEffect, useReducer, useState } from "react";
 import { TurnkeyClient } from "@turnkey/http";
 import * as turnkeyRPC from "~/lib/turnkey-rpc";
 import {
@@ -14,6 +14,7 @@ import { getAddress } from "viem";
 import { toast } from "sonner-native";
 import {
   OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
+  PASSKEY_APP_NAME,
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
   TURNKEY_RP_ID,
@@ -23,6 +24,8 @@ type AuthActionType =
   | { type: "PASSKEY"; payload: User }
   | { type: "INIT_EMAIL_AUTH" }
   | { type: "COMPLETE_EMAIL_AUTH"; payload: User }
+  | { type: "INIT_PHONE_AUTH" }
+  | { type: "COMPLETE_PHONE_AUTH"; payload: User }
   | { type: "EMAIL_RECOVERY"; payload: User }
   | { type: "WALLET_AUTH"; payload: User }
   | { type: "OAUTH"; payload: User }
@@ -53,6 +56,10 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
       return { ...state, loading: null, error: "" };
     case "COMPLETE_EMAIL_AUTH":
       return { ...state, user: action.payload, loading: null, error: "" };
+    case "INIT_PHONE_AUTH":
+      return { ...state, loading: null, error: "" };
+    case "COMPLETE_PHONE_AUTH":
+      return { ...state, user: action.payload, loading: null, error: "" };
     case "PASSKEY":
     case "EMAIL_RECOVERY":
     case "WALLET_AUTH":
@@ -65,8 +72,22 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
 
 export interface TurnkeyClientType {
   state: AuthState;
+  user: User | undefined;
+  updateUser: ({
+    email,
+    phone,
+  }: {
+    email?: string;
+    phone?: string;
+  }) => Promise<void>;
   initEmailLogin: (email: Email) => Promise<void>;
   completeEmailAuth: (params: {
+    otpId: string;
+    otpCode: string;
+    organizationId: string;
+  }) => Promise<void>;
+  initPhoneLogin: (phone: string) => Promise<void>;
+  completePhoneAuth: (params: {
     otpId: string;
     otpCode: string;
     organizationId: string;
@@ -79,8 +100,12 @@ export interface TurnkeyClientType {
 
 export const TurnkeyContext = createContext<TurnkeyClientType>({
   state: initialState,
+  user: undefined,
+  updateUser: async () => Promise.resolve(),
   initEmailLogin: async () => Promise.resolve(),
   completeEmailAuth: async () => Promise.resolve(),
+  initPhoneLogin: async () => Promise.resolve(),
+  completePhoneAuth: async () => Promise.resolve(),
   signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
   logout: async () => Promise.resolve(),
@@ -95,9 +120,70 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const [user, setUser] = useState<User | undefined>(undefined);
+  const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
   const { createEmbeddedKey, createSession, session, clearSession } =
     useSession();
+
+    useEffect(() => {
+      if (session) {
+        (async () => {
+          const stamper = new ApiKeyStamper({
+            apiPrivateKey: session.privateKey,
+            apiPublicKey: session.publicKey.slice(2),
+          });
+          const client = new TurnkeyClient(
+            { baseUrl: TURNKEY_API_URL },
+            stamper
+          );
+          setClient(client);
+  
+          const whoami = await client.getWhoami({
+            organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
+          });
+  
+          if (whoami.userId && whoami.organizationId) {
+            const [walletsResponse, userResponse] = await Promise.all([
+              client.getWallets({
+                organizationId: whoami.organizationId,
+              }),
+              client.getUser({
+                organizationId: whoami.organizationId,
+                userId: whoami.userId,
+              }),
+            ]);
+  
+            const wallets = await Promise.all(
+              walletsResponse.wallets.map(async (wallet) => {
+                const accounts = await client.getWalletAccounts({
+                  organizationId: whoami.organizationId,
+                  walletId: wallet.walletId,
+                });
+                return {
+                  name: wallet.walletName,
+                  id: wallet.walletId,
+                  accounts: accounts.accounts.map((account) =>
+                    getAddress(account.address)
+                  ),
+                };
+              })
+            );
+  
+            const user = userResponse.user;
+  
+            setUser({
+              id: user.userId,
+              userName: user.userName,
+              email: user.userEmail,
+              phoneNumber: user.userPhoneNumber,
+              organizationId: whoami.organizationId,
+              wallets,
+            });
+          }
+        })();
+      }
+    }, [session]);
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -119,6 +205,33 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       dispatch({ type: "ERROR", payload: error.message });
     } finally {
       dispatch({ type: "LOADING", payload: null });
+    }
+  };
+
+  const updateUser = async (userDetails: {
+    email?: string;
+    phone?: string;
+  }) => {
+    if (!client || !user) return;
+
+    const parameters = {
+      userId: user.id,
+      userTagIds: [],
+      userPhoneNumber: userDetails.phone,
+      userEmail: userDetails.email,
+    };
+
+    try {
+      const result = await client.updateUser({
+        type: 'ACTIVITY_TYPE_UPDATE_USER',
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters,
+      });
+
+      toast.success('Info saved 🎉');
+    } catch (error) {
+      console.error('Failed to update user:', error);
     }
   };
 
@@ -157,35 +270,88 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     }
   };
 
+  const initPhoneLogin = async (phone: string) => {
+    dispatch({ type: "LOADING", payload: LoginMethod.Phone });
+    try {
+      const response = await turnkeyRPC.initOTPAuth({
+        otpType: "OTP_TYPE_SMS",
+        contact: phone,
+      });
+
+      if (response) {
+        dispatch({ type: "INIT_PHONE_AUTH" });
+        router.push(
+          `/otp-auth?otpId=${encodeURIComponent(
+            response.otpId
+          )}&organizationId=${encodeURIComponent(response.organizationId)}`
+        );
+      }
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+    } finally {
+      dispatch({ type: "LOADING", payload: null });
+    }
+  };
+
+  const completePhoneAuth = async ({
+    otpId,
+    otpCode,
+    organizationId,
+  }: {
+    otpId: string;
+    otpCode: string;
+    organizationId: string;
+  }) => {
+    if (otpCode) {
+      dispatch({ type: "LOADING", payload: LoginMethod.Phone });
+      try {
+        const targetPublicKey = await createEmbeddedKey();
+
+        const response = await turnkeyRPC.otpAuth({
+          otpId: otpId,
+          otpCode: otpCode,
+          organizationId: organizationId,
+          targetPublicKey,
+          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
+          invalidateExisting: false,
+        });
+
+        if (response.credentialBundle) {
+          await createSession(response.credentialBundle);
+          router.push("/dashboard");
+        }
+      } catch (error: any) {
+        dispatch({ type: "ERROR", payload: error.message });
+      } finally {
+        dispatch({ type: "LOADING", payload: null });
+      }
+    }
+  };
+
   // User will be prompted twice for passkey, once for account creation and once for login
   // TODO: check if there's a better way to handle this
   const signUpWithPasskey = async () => {
-    console.log("signUpWithPasskey called");
     if (!isSupported()) {
       throw new Error("Passkeys are not supported on this device");
     }
-    console.log("passkey supported");
 
     dispatch({ type: "LOADING", payload: LoginMethod.Passkey });
 
     try {
-      console.log("creating passkey");
       const authenticatorParams = await createPasskey({
         authenticatorName: "End-User Passkey",
         rp: {
-          id: "localhost", //TODO: Change this to your site's domain
-          name: "Local Test App", //TODO: Change this to your app's name
+          id: TURNKEY_RP_ID, //TODO: Change this to your site's domain
+          name: PASSKEY_APP_NAME, //TODO: Change this to your app's name
         },
         user: {
           id: String(Date.now()),
           // Name and displayName must match
           // This name is visible to the user. This is what's shown in the passkey prompt
-          name: "Test User",
-          displayName: "Test User",
+          name: "Anonymous User",
+          displayName: "Anonymous User",
         },
       });
-      
-      console.log("created passkey");
 
       const response = await turnkeyRPC.createSubOrg({
         passkey: {
@@ -287,8 +453,12 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     <TurnkeyContext.Provider
       value={{
         state,
+        user,
+        updateUser,
         initEmailLogin,
         completeEmailAuth,
+        initPhoneLogin,
+        completePhoneAuth,
         signUpWithPasskey,
         loginWithPasskey,
         logout,

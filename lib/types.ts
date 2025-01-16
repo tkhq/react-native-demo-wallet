@@ -24,6 +24,7 @@ export type InitOtpAuthParams = {
 
 export type CreateSubOrgParams = {
   email?: Email;
+  phone?: string;
   passkey?: {
     name?: string;
     challenge: string;
@@ -86,7 +87,7 @@ export type User = {
 };
 
 export enum LoginMethod {
-  OtpAuth = 'OTP_AUTH',
   Passkey = 'PASSKEY',
   Email = 'EMAIL',
+  Phone = 'PHONE',
 }

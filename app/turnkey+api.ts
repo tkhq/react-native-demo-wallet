@@ -70,9 +70,13 @@ async function handleInitOtpAuth(params: ParamsType<"initOTPAuth">) {
     organizationId = organizationIds[0];
   } else {
     // User does not exist, create a new sub org before continuing
-    const result = await handleCreateSubOrg({
-      email: contact as Email,
-    });
+
+    const createSubOrgParams =
+      otpType === "OTP_TYPE_EMAIL"
+        ? { email: contact as Email }
+        : { phone: contact };
+
+    const result = await handleCreateSubOrg(createSubOrgParams);
     const { subOrganizationId } = await result.json();
     organizationId = subOrganizationId;
   }
@@ -113,11 +117,12 @@ async function handleOtpAuth(params: ParamsType<"otpAuth">) {
 }
 
 async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
-  const { email, passkey } = params;
+  const { email, phone, passkey } = params;
 
-  const subOrganizationName = `Sub Org - ${email}`;
+  const subOrganizationName = `Sub Org - ${email || phone}`;
   const userName = email ? email.split("@")?.[0] || email : "";
   const userEmail = email;
+  const userPhoneNumber = phone;
   const authenticators = passkey
     ? [
         {
@@ -135,6 +140,7 @@ async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
       {
         userName,
         userEmail,
+        userPhoneNumber,
         oauthProviders: [],
         authenticators,
         apiKeys: [],

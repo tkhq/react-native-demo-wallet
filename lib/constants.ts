@@ -17,6 +17,7 @@ export const NAV_THEME = {
   },
 };
 
+export const PASSKEY_APP_NAME = process.env.EXPO_PUBLIC_PASSKEY_APP_NAME ?? "";
 export const TURNKEY_PARENT_ORG_ID =
   process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "";
 export const TURNKEY_RP_ID = process.env.EXPO_PUBLIC_TURNKEY_RP_ID ?? "";
