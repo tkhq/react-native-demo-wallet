@@ -6,6 +6,7 @@ import PhoneNumberInput from '~/components/auth.phone';
 
 import { useTurnkey } from '~/hooks/use-turnkey';
 import { useEffect, useState } from 'react';
+import { isValidEmail, isValidPhone } from '~/lib/utils';
 
 const Settings = () => {
   const { updateUser, user } = useTurnkey();
@@ -34,7 +35,7 @@ const Settings = () => {
         initialValue={user?.phoneNumber}
         onPhoneChange={onPhoneChange}
       />
-      <Button onPress={handleUpdateUser}>
+      <Button onPress={handleUpdateUser} disabled={!isValidEmail && !isValidPhone}>
         <Text>Update</Text>
       </Button>
     </View>

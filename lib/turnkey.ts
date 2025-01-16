@@ -3,11 +3,11 @@ import { TurnkeyClient } from '@turnkey/http';
 
 export const stampGetWhoami = async (organizationId: string) => {
   const stamper = new PasskeyStamper({
-    rpId: 'react-native-demo-wallet.vercel.app',
+    rpId: process.env.EXPO_PUBLIC_TURNKEY_RP_ID ?? '',
   });
 
   const client = new TurnkeyClient(
-    { baseUrl: 'https://api.turnkey.com' },
+    { baseUrl: process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? '' },
     stamper
   );
 

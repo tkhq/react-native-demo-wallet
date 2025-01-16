@@ -16,6 +16,8 @@ class TurnkeyRPCError extends Error implements TurnkeyRPCErrorDetails {
   }
 }
 
+const BACKEND_API_URL = process.env.EXPO_PUBLIC_BACKEND_API_URL ?? 'http://localhost:8081';
+
 export async function jsonRpcRequest<M extends MethodName, T>(
   method: M,
   params: ParamsType<M>
@@ -26,7 +28,7 @@ export async function jsonRpcRequest<M extends MethodName, T>(
   };
 
   const response = await fetch(
-    'https://react-native-demo-wallet.vercel.app/turnkey',
+    `${BACKEND_API_URL}/turnkey`,
     {
       method: 'POST',
       headers: {
@@ -68,7 +70,7 @@ export const getSubOrgId = async (params: ParamsType<'getSubOrgId'>) => {
 export const createSubOrg = async (params: ParamsType<'createSubOrg'>) => {
   return jsonRpcRequest<
     'createSubOrg',
-    TurnkeyApiTypes['v1CreateSubOrganizationIntentV7']
+    TurnkeyApiTypes['v1CreateSubOrganizationResultV7']
   >('createSubOrg', params);
 };
 

@@ -23,7 +23,8 @@ export type InitOtpAuthParams = {
 };
 
 export type CreateSubOrgParams = {
-  email: Email;
+  email?: Email;
+  phone?: string;
   passkey?: {
     name?: string;
     challenge: string;
@@ -38,8 +39,8 @@ export type GetWhoamiParams = {
 export type OtpAuthParams = {
   otpId: string;
   otpCode: string;
-  targetPublicKey: Hex;
   organizationId: string;
+  targetPublicKey: string;
   apiKeyName?: string;
   expirationSeconds?: string;
   invalidateExisting?: boolean;
@@ -86,7 +87,7 @@ export type User = {
 };
 
 export enum LoginMethod {
-  OtpAuth = 'OTP_AUTH',
   Passkey = 'PASSKEY',
   Email = 'EMAIL',
+  Phone = 'PHONE',
 }

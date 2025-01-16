@@ -1,12 +1,14 @@
-import { JSONRPCRequest, MethodName, ParamsType } from '../lib/types';
-import { DEFAULT_ETHEREUM_ACCOUNTS, Turnkey } from '@turnkey/sdk-server';
+import { Email, JSONRPCRequest, MethodName, ParamsType } from "../lib/types";
+import { DEFAULT_ETHEREUM_ACCOUNTS, Turnkey } from "@turnkey/sdk-server";
 
-const turnkey = new Turnkey({
-  apiBaseUrl: process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? '',
-  defaultOrganizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
-  apiPublicKey: process.env.TURNKEY_API_PUBLIC_KEY ?? '',
-  apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY ?? '',
-}).apiClient();
+export const turnkeyConfig = {
+  apiBaseUrl: process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? "",
+  defaultOrganizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
+  apiPublicKey: process.env.TURNKEY_API_PUBLIC_KEY ?? "",
+  apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY ?? "",
+};
+
+const turnkey = new Turnkey(turnkeyConfig).apiClient();
 
 export async function POST(request: Request) {
   const body: JSONRPCRequest<MethodName> = await request.json();
@@ -14,19 +16,19 @@ export async function POST(request: Request) {
 
   try {
     switch (method) {
-      case 'getSubOrgId':
-        return handleGetSubOrgId(params as ParamsType<'getSubOrgId'>);
-      case 'initOTPAuth':
-        return handleInitOtpAuth(params as ParamsType<'initOTPAuth'>);
-      case 'createSubOrg':
-        return handleCreateSubOrg(params as ParamsType<'createSubOrg'>);
-      case 'otpAuth':
-        return handleOtpAuth(params as ParamsType<'otpAuth'>);
+      case "getSubOrgId":
+        return handleGetSubOrgId(params as ParamsType<"getSubOrgId">);
+      case "initOTPAuth":
+        return handleInitOtpAuth(params as ParamsType<"initOTPAuth">);
+      case "createSubOrg":
+        return handleCreateSubOrg(params as ParamsType<"createSubOrg">);
+      case "otpAuth":
+        return handleOtpAuth(params as ParamsType<"otpAuth">);
       default:
-        return Response.json({ error: 'Method not found' }, { status: 404 });
+        return Response.json({ error: "Method not found" }, { status: 404 });
     }
   } catch (error: any) {
-    console.error('server error', { ...error }, JSON.stringify(error));
+    console.error("server error", { ...error }, JSON.stringify(error));
     if (error) {
       return Response.json(
         { error: error.message, code: error.code },
@@ -34,34 +36,49 @@ export async function POST(request: Request) {
       );
     } else {
       return Response.json(
-        { error: 'An unknown error occurred', code: 0 },
+        { error: "An unknown error occurred", code: 0 },
         { status: 500 }
       );
     }
   }
 }
 
-async function handleGetSubOrgId(params: ParamsType<'getSubOrgId'>) {
+async function handleGetSubOrgId(params: ParamsType<"getSubOrgId">) {
   const { filterType, filterValue } = params;
+
+  let organizationId: string = turnkeyConfig.defaultOrganizationId;
   const { organizationIds } = await turnkey.getSubOrgIds({
     filterType,
     filterValue,
   });
-  return Response.json({ organizationIds });
+  if (organizationIds.length > 0) {
+    organizationId = organizationIds[0];
+  }
+  return Response.json({ organizationId });
 }
 
-async function handleInitOtpAuth(params: ParamsType<'initOTPAuth'>) {
+async function handleInitOtpAuth(params: ParamsType<"initOTPAuth">) {
   const { otpType, contact } = params;
-  let organizationId: string =
-    process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '';
+  let organizationId: string = turnkeyConfig.defaultOrganizationId;
 
   const { organizationIds } = await turnkey.getSubOrgIds({
-    filterType: otpType === 'OTP_TYPE_EMAIL' ? 'EMAIL' : 'PHONE_NUMBER',
+    filterType: otpType === "OTP_TYPE_EMAIL" ? "EMAIL" : "PHONE_NUMBER",
     filterValue: contact,
   });
 
   if (organizationIds.length > 0) {
     organizationId = organizationIds[0];
+  } else {
+    // User does not exist, create a new sub org before continuing
+
+    const createSubOrgParams =
+      otpType === "OTP_TYPE_EMAIL"
+        ? { email: contact as Email }
+        : { phone: contact };
+
+    const result = await handleCreateSubOrg(createSubOrgParams);
+    const { subOrganizationId } = await result.json();
+    organizationId = subOrganizationId;
   }
 
   const result = await turnkey.initOtpAuth({
@@ -73,16 +90,24 @@ async function handleInitOtpAuth(params: ParamsType<'initOTPAuth'>) {
   return Response.json({ ...result, organizationId });
 }
 
-async function handleOtpAuth(params: ParamsType<'otpAuth'>) {
-  const { otpId, otpCode, targetPublicKey, organizationId } = params;
+async function handleOtpAuth(params: ParamsType<"otpAuth">) {
+  const {
+    otpId,
+    otpCode,
+    organizationId,
+    targetPublicKey,
+    expirationSeconds,
+    invalidateExisting,
+  } = params;
 
   try {
     const result = await turnkey.otpAuth({
       otpId,
       otpCode,
-      targetPublicKey,
-      invalidateExisting: false,
       organizationId,
+      targetPublicKey,
+      expirationSeconds,
+      invalidateExisting,
     });
 
     return Response.json(result);
@@ -91,30 +116,39 @@ async function handleOtpAuth(params: ParamsType<'otpAuth'>) {
   }
 }
 
-async function handleCreateSubOrg(params: ParamsType<'createSubOrg'>) {
-  const { email, passkey } = params;
+async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
+  const { email, phone, passkey } = params;
+
+  const subOrganizationName = `Sub Org - ${email || phone}`;
+  const userName = email ? email.split("@")?.[0] || email : "";
+  const userEmail = email;
+  const userPhoneNumber = phone;
+  const authenticators = passkey
+    ? [
+        {
+          authenticatorName: "Passkey",
+          challenge: passkey.challenge,
+          attestation: passkey.attestation,
+        },
+      ]
+    : [];
+
   const result = await turnkey.createSubOrganization({
-    organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
-    subOrganizationName: `Sub-organization at ${String(Date.now())}`,
+    organizationId: turnkeyConfig.defaultOrganizationId,
+    subOrganizationName: subOrganizationName,
     rootUsers: [
       {
-        userName: 'Root User',
-        userEmail: email,
+        userName,
+        userEmail,
+        userPhoneNumber,
         oauthProviders: [],
-        authenticators: passkey
-          ? [
-              {
-                authenticatorName: 'Passkey',
-                ...passkey,
-              },
-            ]
-          : [],
+        authenticators,
         apiKeys: [],
       },
     ],
     rootQuorumThreshold: 1,
     wallet: {
-      walletName: 'Default Wallet',
+      walletName: "Default Wallet",
       accounts: DEFAULT_ETHEREUM_ACCOUNTS,
     },
   });

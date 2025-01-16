@@ -15,20 +15,25 @@ import { Turnkey } from '~/lib/icons/Turnkey';
 import { router } from 'expo-router';
 import { LoginMethod } from '~/lib/types';
 import { toast } from 'sonner-native';
+import { useSearchParams } from 'expo-router/build/hooks';
 
 const OTPAuth = () => {
   const [otpCode, setOtpCode] = useState('');
-  const { completeLogin, error, clearError } = useTurnkey();
+  const { state, completeEmailAuth, clearError } = useTurnkey();
   const otpInputRef = useRef<OtpInputRef>(null);
 
+  const searchParams = useSearchParams();
+  const otpId = searchParams.get('otpId') ?? '';
+  const organizationId = searchParams.get('organizationId') ?? '';
+
   useEffect(() => {
-    if (error) {
-      toast.error(error);
+    if (state.error) {
+      toast.error(state.error);
       clearError();
       setOtpCode('');
       otpInputRef.current?.clear();
     }
-  }, [error]);
+  }, [state.error]);
 
   return (
     <View className="flex-1 justify-center items-center gap-5 p-6 bg-secondary/30">
@@ -70,7 +75,7 @@ const OTPAuth = () => {
           <Button
             className="flex-1"
             disabled={otpCode.length !== 6}
-            onPress={() => completeLogin(LoginMethod.OtpAuth, { otpCode })}
+            onPress={() => completeEmailAuth({ otpId, otpCode, organizationId })}
           >
             <Text>Continue</Text>
           </Button>
