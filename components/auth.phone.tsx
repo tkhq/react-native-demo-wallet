@@ -34,7 +34,7 @@ const PhoneNumberInput = ({
 }) => {
   const [phone, setPhone] = useState(initialValue ?? "");
   const [callingCode, setCallingCode] = useState({
-    code: "+1",
+    code: countries[0].code,
     flag: countries[0].flag,
   });
   const [dropdownVisible, setDropdownVisible] = useState(false);

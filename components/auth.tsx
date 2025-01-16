@@ -11,13 +11,8 @@ import { Email, LoginMethod } from "~/lib/types";
 import { LoaderButton } from "./ui/loader-button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { cn } from "~/lib/utils";
+import { cn, isValidEmail, isValidPhone } from "~/lib/utils";
 import { BaseButton } from "react-native-gesture-handler";
-
-const isValidEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
 
 function Auth() {
   const insets = useSafeAreaInsets();
@@ -62,10 +57,10 @@ function Auth() {
             <PhoneNumberInput onPhoneChange={handlePhoneChange} />
             <LoaderButton
               variant="outline"
-              disabled={!!state.loading || phone.length < 12}
+              disabled={!!state.loading || !isValidPhone(phone)}
               loading={state.loading === LoginMethod.Phone}
               onPress={() => initPhoneLogin(phone)}
-              className={cn("rounded-xl", { "border-black": phone.length === 12 })}
+              className={cn("rounded-xl", { "border-black": isValidPhone(phone) })}
             >
               <Text>Continue</Text>
             </LoaderButton>

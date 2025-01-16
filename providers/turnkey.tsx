@@ -213,27 +213,38 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     phone?: string;
   }) => {
     if (!client || !user) return;
-
-    const parameters = {
+  
+    const parameters: {
+      userId: string;
+      userTagIds: string[];
+      userPhoneNumber?: string;
+      userEmail?: string;
+    } = {
       userId: user.id,
       userTagIds: [],
-      userPhoneNumber: userDetails.phone,
-      userEmail: userDetails.email,
     };
-
+  
+    if (userDetails.phone && userDetails.phone.trim()) {
+      parameters.userPhoneNumber = userDetails.phone;
+    }
+  
+    if (userDetails.email && userDetails.email.trim()) {
+      parameters.userEmail = userDetails.email;
+    }
+    
     try {
       const result = await client.updateUser({
-        type: 'ACTIVITY_TYPE_UPDATE_USER',
+        type: "ACTIVITY_TYPE_UPDATE_USER",
         timestampMs: Date.now().toString(),
         organizationId: user.organizationId,
         parameters,
       });
-
-      toast.success('Info saved 🎉');
+  
+      toast.success("Info saved 🎉");
     } catch (error) {
-      console.error('Failed to update user:', error);
+      console.error("Failed to update user:", error);
     }
-  };
+  };  
 
   const completeEmailAuth = async ({
     otpId,
