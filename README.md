@@ -2,6 +2,10 @@
 
 This project is a React Native application designed to demonstrate a wallet functionality. It uses Vercel Serverless Functions to handle API requests and is configured to run on iOS, Android, and web platforms.
 
+## Demo
+
+<video src="assets/videos/demo_video.mov" controls width="720"></video>
+
 ## Table of Contents
 
 - [Setup Instructions](#setup-instructions)
