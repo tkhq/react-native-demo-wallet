@@ -1,12 +1,11 @@
 import { View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
-import EmailInput from '~/components/auth.email';
-import PhoneNumberInput from '~/components/auth.phone';
-
 import { useTurnkey } from '~/hooks/use-turnkey';
 import { useEffect, useState } from 'react';
 import { isValidEmail, isValidPhone } from '~/lib/utils';
+import EmailInput from '~/components/auth/auth.email';
+import PhoneNumberInput from '~/components/auth/auth.phone';
 
 const Settings = () => {
   const { updateUser, user } = useTurnkey();
