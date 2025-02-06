@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Auth from '~/components/auth/auth';
+import { Auth } from '~/components/auth/auth';
 
 
 function Landing() {

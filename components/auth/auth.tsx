@@ -12,9 +12,9 @@ import EmailInput from "./auth.email";
 import { LoaderButton } from "../ui/loader-button";
 import OrSeparator from "../or-separator";
 import PhoneNumberInput from "./auth.phone";
-import OAuth from "./oauth";
+import { OAuth } from "./oauth";
 
-function Auth() {
+export const Auth = () => {
   const insets = useSafeAreaInsets();
   const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useTurnkey();
 
@@ -93,5 +93,3 @@ function Auth() {
     </View>
   );
 }
-
-export default Auth;
