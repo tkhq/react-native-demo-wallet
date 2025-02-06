@@ -1,45 +1,31 @@
-import * as AvatarPrimitive from '@rn-primitives/avatar';
-import * as React from 'react';
-import { cn } from '~/lib/utils';
+import * as React from "react";
+import { View, Image } from "react-native";
+import { cn } from "~/lib/utils";
+import DefaultProfile from "~/assets/svgs/default-profile.svg";
 
-const AvatarPrimitiveRoot = AvatarPrimitive.Root;
-const AvatarPrimitiveImage = AvatarPrimitive.Image;
-const AvatarPrimitiveFallback = AvatarPrimitive.Fallback;
+interface AvatarProps {
+  src?: string;
+  alt?: string;
+  className?: string;
+}
 
-const Avatar = React.forwardRef<AvatarPrimitive.RootRef, AvatarPrimitive.RootProps>(
-  ({ className, ...props }, ref) => (
-    <AvatarPrimitiveRoot
-      ref={ref}
-      className={cn('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full', className)}
-      {...props}
-    />
-  )
-);
-Avatar.displayName = AvatarPrimitiveRoot.displayName;
-
-const AvatarImage = React.forwardRef<AvatarPrimitive.ImageRef, AvatarPrimitive.ImageProps>(
-  ({ className, ...props }, ref) => (
-    <AvatarPrimitiveImage
-      ref={ref}
-      className={cn('aspect-square h-full w-full', className)}
-      {...props}
-    />
-  )
-);
-AvatarImage.displayName = AvatarPrimitiveImage.displayName;
-
-const AvatarFallback = React.forwardRef<AvatarPrimitive.FallbackRef, AvatarPrimitive.FallbackProps>(
-  ({ className, ...props }, ref) => (
-    <AvatarPrimitiveFallback
-      ref={ref}
+export const Avatar: React.FC<AvatarProps> = ({ src, alt, className }) => {
+  return (
+    <View
       className={cn(
-        'flex h-full w-full items-center justify-center rounded-full bg-muted',
+        "h-10 w-10 rounded-full bg-white flex items-center justify-center overflow-hidden",
         className
       )}
-      {...props}
-    />
-  )
-);
-AvatarFallback.displayName = AvatarPrimitiveFallback.displayName;
-
-export { Avatar, AvatarFallback, AvatarImage };
+    >
+      {src ? (
+        <Image
+          source={{ uri: src }}
+          alt={alt}
+          className="h-full w-full rounded-full"
+        />
+      ) : (
+        <DefaultProfile width={20} height={20} />
+      )}
+    </View>
+  );
+};

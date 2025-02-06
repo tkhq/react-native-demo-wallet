@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
@@ -9,11 +8,11 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Text } from '~/components/ui/text';
-import { Avatar, AvatarFallback } from './ui/avatar';
-
+import { Avatar } from './ui/avatar';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'react-native-drawer-layout';
 import { useTurnkey } from '~/hooks/use-turnkey';
+import DefaultProfile from '~/assets/svgs/default-profile.svg';
 
 export function Account() {
   const { logout } = useTurnkey();
@@ -25,9 +24,7 @@ export function Account() {
           variant="ghost"
           className="p-0 bg-none w-12 rounded-full web:hover:bg-none active:bg-none space-x-0"
         >
-          <Avatar alt="Account Avatar">
-            <AvatarFallback className="bg-gradient-to-br from-primary/50 to-primary/70"></AvatarFallback>
-          </Avatar>
+          <Avatar alt="Account Avatar" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
