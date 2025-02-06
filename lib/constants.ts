@@ -24,3 +24,5 @@ export const TURNKEY_RP_ID = process.env.EXPO_PUBLIC_TURNKEY_RP_ID ?? "";
 export const TURNKEY_API_URL = process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? "";
 export const OTP_AUTH_DEFAULT_EXPIRATION_SECONDS = 15 * 60;
 
+export const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+export const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";

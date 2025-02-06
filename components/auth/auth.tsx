@@ -12,11 +12,11 @@ import EmailInput from "./auth.email";
 import { LoaderButton } from "../ui/loader-button";
 import OrSeparator from "../or-separator";
 import PhoneNumberInput from "./auth.phone";
-import { GoogleAuthButton } from "./auth.google";
+import OAuth from "./oauth";
 
 function Auth() {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey } = useTurnkey();
+  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useTurnkey();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -41,7 +41,7 @@ function Auth() {
         </CardHeader>
         <CardContent>
           <View className="gap-6">
-            <GoogleAuthButton />
+            <OAuth onSuccess={loginWithOAuth} />
             <OrSeparator />
             <EmailInput onEmailChange={handleEmailChange} />
             <LoaderButton

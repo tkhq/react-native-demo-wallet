@@ -89,3 +89,12 @@ export const otpAuth = async (
     params
   );
 };
+
+export const oAuthLogin = async (
+  params: ParamsType<'oAuthLogin'>
+): Promise<TurnkeyApiTypes['v1OauthResult']> => {
+  return jsonRpcRequest<'oAuthLogin', TurnkeyApiTypes['v1OauthResult']>(
+    'oAuthLogin',
+    params
+  );
+};
