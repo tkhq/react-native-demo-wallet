@@ -1,8 +1,8 @@
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Icons } from '~/components/icons';
 import { cn } from '~/lib/utils';
 import { Account } from './account';
+import { Text } from './ui/text';
 
 export function Header({ className }: { className?: string }) {
   const insets = useSafeAreaInsets();
@@ -14,7 +14,7 @@ export function Header({ className }: { className?: string }) {
         className
       )}
     >
-      <Icons.turnkey className="fill-white stroke-none" />
+      <Text className="text-2xl text-white font-bold">Demo Wallet</Text>
       <Account />
     </View>
   );

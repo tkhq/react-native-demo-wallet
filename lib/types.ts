@@ -30,6 +30,7 @@ export type CreateSubOrgParams = {
     challenge: string;
     attestation: Attestation;
   };
+  oauth?: OAuthProviderParams;
 };
 
 export type GetWhoamiParams = {
@@ -46,12 +47,25 @@ export type OtpAuthParams = {
   invalidateExisting?: boolean;
 };
 
+export type OAuthProviderParams = {
+  providerName: string;
+  oidcToken: string;
+}
+
+export type OAuthLoginParams = {
+  oidcToken: string;
+  providerName: string;
+  targetPublicKey: string;
+  expirationSeconds: string;
+}
+
 export type MethodParamsMap = {
   getSubOrgId: GetSubOrgIdParams;
   initOTPAuth: InitOtpAuthParams;
   createSubOrg: CreateSubOrgParams;
   getWhoami: GetWhoamiParams;
   otpAuth: OtpAuthParams;
+  oAuthLogin: OAuthLoginParams;
 };
 
 export type MethodName = keyof MethodParamsMap;
@@ -90,4 +104,5 @@ export enum LoginMethod {
   Passkey = 'PASSKEY',
   Email = 'EMAIL',
   Phone = 'PHONE',
+  OAuth = 'OAUTH',
 }

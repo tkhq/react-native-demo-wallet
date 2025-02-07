@@ -4,6 +4,8 @@
   <dict>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
+    <key>CFBundleAllowMixedLocalizations</key>
+    <true/>
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
@@ -27,8 +29,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>react-native-demo-wallet</string>
-          <string>app.vercel.react-native-demo-wallet</string>
+          <string>com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm</string>
         </array>
       </dict>
     </array>

@@ -16,10 +16,19 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "xyz.tkhqlabs.passkeyapp",
       "associatedDomains": [
-        "webcredentials:react-native-demo-wallet.vercel.app"
+        "webcredentials:passkeyapp.tkhqlabs.xyz"
       ],
-      "bundleIdentifier": "app.vercel.react-native-demo-wallet"
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {

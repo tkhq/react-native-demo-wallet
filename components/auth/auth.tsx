@@ -1,22 +1,22 @@
 import * as React from "react";
-import EmailInput from "./auth.email";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { Button } from "./ui/button";
-import OrSeparator from "./or-separator";
 import { useTurnkey } from "~/hooks/use-turnkey";
 import { isSupported } from "@turnkey/react-native-passkey-stamper";
-import PhoneNumberInput from "./auth.phone";
 import { Email, LoginMethod } from "~/lib/types";
-import { LoaderButton } from "./ui/loader-button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cn, isValidEmail, isValidPhone } from "~/lib/utils";
 import { BaseButton } from "react-native-gesture-handler";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import EmailInput from "./auth.email";
+import { LoaderButton } from "../ui/loader-button";
+import OrSeparator from "../or-separator";
+import PhoneNumberInput from "./auth.phone";
+import { OAuth } from "./oauth";
 
-function Auth() {
+export const Auth = () => {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey } = useTurnkey();
+  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useTurnkey();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -41,6 +41,8 @@ function Auth() {
         </CardHeader>
         <CardContent>
           <View className="gap-6">
+            <OAuth onSuccess={loginWithOAuth} />
+            <OrSeparator />
             <EmailInput onEmailChange={handleEmailChange} />
             <LoaderButton
               variant="outline"
@@ -91,5 +93,3 @@ function Auth() {
     </View>
   );
 }
-
-export default Auth;

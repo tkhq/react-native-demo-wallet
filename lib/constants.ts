@@ -20,7 +20,9 @@ export const NAV_THEME = {
 export const PASSKEY_APP_NAME = process.env.EXPO_PUBLIC_PASSKEY_APP_NAME ?? "";
 export const TURNKEY_PARENT_ORG_ID =
   process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "";
-export const TURNKEY_RP_ID = process.env.EXPO_PUBLIC_TURNKEY_RP_ID ?? "";
+export const TURNKEY_RP_ID = process.env.EXPO_PUBLIC_RPID ?? "";
 export const TURNKEY_API_URL = process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? "";
 export const OTP_AUTH_DEFAULT_EXPIRATION_SECONDS = 15 * 60;
 
+export const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? "";
+export const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "";

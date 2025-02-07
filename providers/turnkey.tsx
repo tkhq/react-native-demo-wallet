@@ -1,4 +1,10 @@
-import { ReactNode, createContext, useEffect, useReducer, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { TurnkeyClient } from "@turnkey/http";
 import * as turnkeyRPC from "~/lib/turnkey-rpc";
 import {
@@ -60,6 +66,7 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
       return { ...state, loading: null, error: "" };
     case "COMPLETE_PHONE_AUTH":
       return { ...state, user: action.payload, loading: null, error: "" };
+    case "OAUTH":
     case "PASSKEY":
     case "EMAIL_RECOVERY":
     case "WALLET_AUTH":
@@ -94,6 +101,12 @@ export interface TurnkeyClientType {
   }) => Promise<void>;
   signUpWithPasskey: () => Promise<void>;
   loginWithPasskey: () => Promise<void>;
+  loginWithOAuth: (params: {
+    oidcToken: string;
+    providerName: string;
+    targetPublicKey: string;
+    expirationSeconds: string
+  })=> Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -108,6 +121,7 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   completePhoneAuth: async () => Promise.resolve(),
   signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
+  loginWithOAuth: async () => Promise.resolve(),
   logout: async () => Promise.resolve(),
   clearError: () => {},
 });
@@ -126,64 +140,61 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const { createEmbeddedKey, createSession, session, clearSession } =
     useSession();
 
-    useEffect(() => {
-      if (session) {
-        (async () => {
-          const stamper = new ApiKeyStamper({
-            apiPrivateKey: session.privateKey,
-            apiPublicKey: session.publicKey.slice(2),
-          });
-          const client = new TurnkeyClient(
-            { baseUrl: TURNKEY_API_URL },
-            stamper
-          );
-          setClient(client);
-  
-          const whoami = await client.getWhoami({
-            organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? '',
-          });
-  
-          if (whoami.userId && whoami.organizationId) {
-            const [walletsResponse, userResponse] = await Promise.all([
-              client.getWallets({
-                organizationId: whoami.organizationId,
-              }),
-              client.getUser({
-                organizationId: whoami.organizationId,
-                userId: whoami.userId,
-              }),
-            ]);
-  
-            const wallets = await Promise.all(
-              walletsResponse.wallets.map(async (wallet) => {
-                const accounts = await client.getWalletAccounts({
-                  organizationId: whoami.organizationId,
-                  walletId: wallet.walletId,
-                });
-                return {
-                  name: wallet.walletName,
-                  id: wallet.walletId,
-                  accounts: accounts.accounts.map((account) =>
-                    getAddress(account.address)
-                  ),
-                };
-              })
-            );
-  
-            const user = userResponse.user;
-  
-            setUser({
-              id: user.userId,
-              userName: user.userName,
-              email: user.userEmail,
-              phoneNumber: user.userPhoneNumber,
+  useEffect(() => {
+    if (session) {
+      (async () => {
+        const stamper = new ApiKeyStamper({
+          apiPrivateKey: session.privateKey,
+          apiPublicKey: session.publicKey.slice(2),
+        });
+        const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
+        setClient(client);
+
+        const whoami = await client.getWhoami({
+          organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
+        });
+
+        if (whoami.userId && whoami.organizationId) {
+          const [walletsResponse, userResponse] = await Promise.all([
+            client.getWallets({
               organizationId: whoami.organizationId,
-              wallets,
-            });
-          }
-        })();
-      }
-    }, [session]);
+            }),
+            client.getUser({
+              organizationId: whoami.organizationId,
+              userId: whoami.userId,
+            }),
+          ]);
+
+          const wallets = await Promise.all(
+            walletsResponse.wallets.map(async (wallet) => {
+              const accounts = await client.getWalletAccounts({
+                organizationId: whoami.organizationId,
+                walletId: wallet.walletId,
+              });
+              return {
+                name: wallet.walletName,
+                id: wallet.walletId,
+                accounts: accounts.accounts.map((account) =>
+                  getAddress(account.address)
+                ),
+              };
+            })
+          );
+
+          const user = userResponse.user;
+
+          setUser({
+            id: user.userId,
+            userName: user.userName,
+            email: user.userEmail,
+            phoneNumber: user.userPhoneNumber,
+            organizationId: whoami.organizationId,
+            wallets,
+          });
+        }
+      })();
+    }
+  }, [session]);
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -213,7 +224,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     phone?: string;
   }) => {
     if (!client || !user) return;
-  
+
     const parameters: {
       userId: string;
       userTagIds: string[];
@@ -223,15 +234,15 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       userId: user.id,
       userTagIds: [],
     };
-  
+
     if (userDetails.phone && userDetails.phone.trim()) {
       parameters.userPhoneNumber = userDetails.phone;
     }
-  
+
     if (userDetails.email && userDetails.email.trim()) {
       parameters.userEmail = userDetails.email;
     }
-    
+
     try {
       const result = await client.updateUser({
         type: "ACTIVITY_TYPE_UPDATE_USER",
@@ -239,12 +250,12 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         organizationId: user.organizationId,
         parameters,
       });
-  
+
       toast.success("Info saved 🎉");
     } catch (error) {
       console.error("Failed to update user:", error);
     }
-  };  
+  };
 
   const completeEmailAuth = async ({
     otpId,
@@ -340,7 +351,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   };
 
   // User will be prompted twice for passkey, once for account creation and once for login
-  // TODO: check if there's a better way to handle this
   const signUpWithPasskey = async () => {
     if (!isSupported()) {
       throw new Error("Passkeys are not supported on this device");
@@ -352,8 +362,8 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       const authenticatorParams = await createPasskey({
         authenticatorName: "End-User Passkey",
         rp: {
-          id: TURNKEY_RP_ID, //TODO: Change this to your site's domain
-          name: PASSKEY_APP_NAME, //TODO: Change this to your app's name
+          id: TURNKEY_RP_ID,
+          name: PASSKEY_APP_NAME,
         },
         user: {
           id: String(Date.now()),
@@ -451,6 +461,37 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     }
   };
 
+  const loginWithOAuth = async ({
+    oidcToken,
+    providerName,
+    targetPublicKey,
+    expirationSeconds,
+  }: {
+    oidcToken: string;
+    providerName: string;
+    targetPublicKey: string;
+    expirationSeconds: string;
+  }) => {
+    dispatch({ type: "LOADING", payload: LoginMethod.OAuth });
+    try {
+      const response = await turnkeyRPC.oAuthLogin({
+        oidcToken,
+        providerName,
+        targetPublicKey,
+        expirationSeconds,
+      });
+
+      if (response.credentialBundle) {
+        await createSession(response.credentialBundle);
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+    } finally {
+      dispatch({ type: "LOADING", payload: null });
+    }
+  };
+
   const logout = async () => {
     await clearSession();
     router.replace("/");
@@ -472,6 +513,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         completePhoneAuth,
         signUpWithPasskey,
         loginWithPasskey,
+        loginWithOAuth,
         logout,
         clearError,
       }}

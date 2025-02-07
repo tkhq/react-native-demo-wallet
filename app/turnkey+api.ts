@@ -1,5 +1,6 @@
 import { Email, JSONRPCRequest, MethodName, ParamsType } from "../lib/types";
 import { DEFAULT_ETHEREUM_ACCOUNTS, Turnkey } from "@turnkey/sdk-server";
+import { decode, JwtPayload } from "jsonwebtoken";
 
 export const turnkeyConfig = {
   apiBaseUrl: process.env.EXPO_PUBLIC_TURNKEY_API_URL ?? "",
@@ -9,6 +10,16 @@ export const turnkeyConfig = {
 };
 
 const turnkey = new Turnkey(turnkeyConfig).apiClient();
+
+function decodeJwt(credential: string): JwtPayload | null {
+  const decoded = decode(credential);
+
+  if (decoded && typeof decoded === "object" && "email" in decoded) {
+    return decoded as JwtPayload;
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
   const body: JSONRPCRequest<MethodName> = await request.json();
@@ -24,6 +35,8 @@ export async function POST(request: Request) {
         return handleCreateSubOrg(params as ParamsType<"createSubOrg">);
       case "otpAuth":
         return handleOtpAuth(params as ParamsType<"otpAuth">);
+      case "oAuthLogin":
+        return handleOAuthLogin(params as ParamsType<"oAuthLogin">);
       default:
         return Response.json({ error: "Method not found" }, { status: 404 });
     }
@@ -117,12 +130,8 @@ async function handleOtpAuth(params: ParamsType<"otpAuth">) {
 }
 
 async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
-  const { email, phone, passkey } = params;
+  const { email, phone, passkey, oauth } = params;
 
-  const subOrganizationName = `Sub Org - ${email || phone}`;
-  const userName = email ? email.split("@")?.[0] || email : "";
-  const userEmail = email;
-  const userPhoneNumber = phone;
   const authenticators = passkey
     ? [
         {
@@ -133,6 +142,32 @@ async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
       ]
     : [];
 
+  const oauthProviders = oauth
+    ? [
+        {
+          providerName: oauth.providerName,
+          oidcToken: oauth.oidcToken,
+        },
+      ]
+    : [];
+
+  let userEmail = email;
+
+  // If the user is logging in with a Google Auth credential, use the email from the decoded OIDC token (credential
+  // Otherwise, use the email from the email parameter
+  if (oauth) {
+    const decoded = decodeJwt(oauth.oidcToken);
+    if (decoded?.email) {
+      userEmail = decoded.email;
+    }
+  }
+
+  const userPhoneNumber = phone;
+
+
+  const subOrganizationName = `Sub Org - ${email || phone}`;
+  const userName = email ? email.split("@")?.[0] || email : "";
+
   const result = await turnkey.createSubOrganization({
     organizationId: turnkeyConfig.defaultOrganizationId,
     subOrganizationName: subOrganizationName,
@@ -141,7 +176,7 @@ async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
         userName,
         userEmail,
         userPhoneNumber,
-        oauthProviders: [],
+        oauthProviders,
         authenticators,
         apiKeys: [],
       },
@@ -153,4 +188,33 @@ async function handleCreateSubOrg(params: ParamsType<"createSubOrg">) {
     },
   });
   return Response.json(result);
+}
+
+async function handleOAuthLogin(params: ParamsType<"oAuthLogin">) {
+  const { oidcToken, providerName, targetPublicKey, expirationSeconds } =
+    params;
+  let organizationId: string = turnkeyConfig.defaultOrganizationId;
+
+  const { organizationIds } = await turnkey.getSubOrgIds({
+    filterType: "OIDC_TOKEN",
+    filterValue: oidcToken,
+  });
+
+  if (organizationIds.length > 0) {
+    organizationId = organizationIds[0];
+  } else {
+    const createSubOrgParams = { oauth: { oidcToken, providerName } };
+    const result = await handleCreateSubOrg(createSubOrgParams);
+    const { subOrganizationId } = await result.json();
+    organizationId = subOrganizationId;
+  }
+
+  const oauthResponse = await turnkey.oauth({
+    organizationId,
+    oidcToken,
+    targetPublicKey,
+    expirationSeconds,
+  });
+
+  return Response.json(oauthResponse);
 }
