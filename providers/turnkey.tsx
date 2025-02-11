@@ -15,9 +15,8 @@ import {
 import { useRouter } from "expo-router";
 import { useSession } from "~/hooks/use-session";
 import { ApiKeyStamper } from "@turnkey/api-key-stamper";
-import { Email, LoginMethod, User } from "~/lib/types";
+import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
 import { getAddress } from "viem";
-import { toast } from "sonner-native";
 import {
   OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
   PASSKEY_APP_NAME,
@@ -25,8 +24,7 @@ import {
   TURNKEY_PARENT_ORG_ID,
   TURNKEY_RP_ID,
 } from "~/lib/constants";
-import { decryptExportBundle } from "@turnkey/crypto";
-
+import { decryptExportBundle, encryptWalletToBundle } from "@turnkey/crypto";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -109,6 +107,15 @@ export interface TurnkeyClientType {
     targetPublicKey: string;
     expirationSeconds: string;
   }) => Promise<void>;
+  importWallet: (params: {
+    mnemonic: string;
+    walletName: string;
+    accounts: WalletAccountParams[];
+  }) => Promise<void>;
+  createWallet: (params: {
+    walletName: string;
+    accounts: WalletAccountParams[];
+    mnemonicLength?: number; }) => Promise<void>;
   exportWallet: (params: { walletId: string }) => Promise<string>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -125,6 +132,8 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
   loginWithOAuth: async () => Promise.resolve(),
+  importWallet: async () => Promise.resolve(),
+  createWallet: async () => Promise.resolve(),
   exportWallet: async () => Promise.resolve(""),
   logout: async () => Promise.resolve(),
   clearError: () => {},
@@ -149,61 +158,67 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     clearSession,
   } = useSession();
 
-  useEffect(() => {
+  const fetchAndSetUserData = async () => {
     if (session) {
-      (async () => {
-        const stamper = new ApiKeyStamper({
-          apiPrivateKey: session.privateKey,
-          apiPublicKey: session.publicKey.slice(2),
-        });
-        const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
-        setClient(client);
+      const stamper = new ApiKeyStamper({
+        apiPrivateKey: session.privateKey,
+        apiPublicKey: session.publicKey.slice(2),
+      });
+      const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
+      setClient(client);
 
-        const whoami = await client.getWhoami({
-          organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
-        });
+      const whoami = await client.getWhoami({
+        organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
+      });
 
-        if (whoami.userId && whoami.organizationId) {
-          const [walletsResponse, userResponse] = await Promise.all([
-            client.getWallets({
-              organizationId: whoami.organizationId,
-            }),
-            client.getUser({
-              organizationId: whoami.organizationId,
-              userId: whoami.userId,
-            }),
-          ]);
-
-          const wallets = await Promise.all(
-            walletsResponse.wallets.map(async (wallet) => {
-              const accounts = await client.getWalletAccounts({
-                organizationId: whoami.organizationId,
-                walletId: wallet.walletId,
-              });
-              return {
-                name: wallet.walletName,
-                id: wallet.walletId,
-                accounts: accounts.accounts.map((account) =>
-                  getAddress(account.address)
-                ),
-              };
-            })
-          );
-
-          const user = userResponse.user;
-
-          setUser({
-            id: user.userId,
-            userName: user.userName,
-            email: user.userEmail,
-            phoneNumber: user.userPhoneNumber,
+      if (whoami.userId && whoami.organizationId) {
+        const [walletsResponse, userResponse] = await Promise.all([
+          client.getWallets({
             organizationId: whoami.organizationId,
-            wallets,
-          });
-        }
-      })();
+          }),
+          client.getUser({
+            organizationId: whoami.organizationId,
+            userId: whoami.userId,
+          }),
+        ]);
+
+        const wallets = await Promise.all(
+          walletsResponse.wallets.map(async (wallet) => {
+            const accounts = await client.getWalletAccounts({
+              organizationId: whoami.organizationId,
+              walletId: wallet.walletId,
+            });
+            return {
+              name: wallet.walletName,
+              id: wallet.walletId,
+              accounts: accounts.accounts.map((account) =>
+                getAddress(account.address)
+              ),
+            };
+          })
+        );
+
+        const user = userResponse.user;
+
+        setUser({
+          id: user.userId,
+          userName: user.userName,
+          email: user.userEmail,
+          phoneNumber: user.userPhoneNumber,
+          organizationId: whoami.organizationId,
+          wallets,
+        });
+      }
     }
+  };
+
+  useEffect(() => {
+    fetchAndSetUserData();
   }, [session]);
+
+  const onSessionUpdate = async () => {
+    await fetchAndSetUserData();
+  };
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -260,7 +275,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         parameters,
       });
 
-      toast.success("Info saved 🎉");
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -501,7 +515,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     }
   };
 
-  const exportWallet = async ({ walletId }: { walletId: string }): Promise<string> => {
+  const exportWallet = async ({
+    walletId,
+  }: {
+    walletId: string;
+  }): Promise<string> => {
     try {
       const targetPublicKey = await createEmbeddedKey();
 
@@ -528,14 +546,99 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         embeddedKey,
         organizationId: user.organizationId,
         returnMnemonic: true,
-        dangerouslyOverrideSignerPublicKey: "04bce6666ca6c12e0e00a503a52c301319687dca588165b551d369496bd1189235bd8302ae5e001fde51d1e22baa1d44249f2de9705c63797316fc8b7e3969a665",
       });
-
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
       console.log("error", error);
       throw error;
-   } 
+    }
+  };
+
+  const importWallet = async ({
+    walletName,
+    mnemonic,
+    accounts,
+  }: {
+    walletName: string;
+    mnemonic: string;
+    accounts: WalletAccountParams[];
+  }): Promise<void> => {
+    try {
+      if (client == null || user == null) {
+        throw new Error("Client or user not initialized");
+      }
+
+      const initResponse = await client.initImportWallet({
+        type: "ACTIVITY_TYPE_INIT_IMPORT_WALLET",
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters: { userId: user.id },
+      });
+
+      const importBundle =
+        initResponse.activity.result.initImportWalletResult?.importBundle;
+
+      if (importBundle == null) {
+        throw new Error("Failed to get import bundle");
+      }
+
+      const encryptedBundle = await encryptWalletToBundle({
+        mnemonic,
+        importBundle,
+        userId: user.id,
+        organizationId: user.organizationId,
+      });
+
+      const response = await client.importWallet({
+        type: "ACTIVITY_TYPE_IMPORT_WALLET",
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters: { userId: user.id, walletName, encryptedBundle, accounts },
+      });
+
+      if (response.activity.result.importWalletResult?.walletId != null) {
+        await onSessionUpdate();
+      }
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+      console.log("error", error);
+      throw error;
+    }
+  };
+
+  const createWallet = async ({
+    walletName,
+    accounts,
+    mnemonicLength,
+  }: {
+    walletName: string;
+    accounts: WalletAccountParams[];
+    mnemonicLength?: number;
+  }): Promise<void> => {
+    try {
+      if (client == null || user == null) {
+        throw new Error("Client or user not initialized");
+      }
+
+      const response = await client.createWallet({
+        type: "ACTIVITY_TYPE_CREATE_WALLET",
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters: {
+          walletName,
+          accounts,
+          mnemonicLength,
+        },
+      });
+
+      if (response.activity.result.createWalletResult?.walletId != null) {
+        await onSessionUpdate();
+      }
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+      console.log("error", error);
+      throw error;
+    }
   };
 
   const logout = async () => {
@@ -560,6 +663,8 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         signUpWithPasskey,
         loginWithPasskey,
         loginWithOAuth,
+        importWallet,
+        createWallet,
         exportWallet,
         logout,
         clearError,

@@ -56,7 +56,6 @@ export const WalletCard = (props: WalletCardProps) => {
 
   const handleCopySeedPhrase = async () => {
     await navigator.clipboard.writeText(seedPhrase || "");
-    alert("Seed phrase copied!");
   };
 
   return (
@@ -120,7 +119,7 @@ export const WalletCard = (props: WalletCardProps) => {
             </BaseButton>
             <Button
               onPress={() => setModalVisible(false)}
-              className="mt-2 p-3 rounded-lg"
+              className="mt-8 p-3 rounded-lg bg-blue-600"
             >
               <Text className="text-white text-center font-bold">Done</Text>
             </Button>

@@ -1307,6 +1307,8 @@ PODS:
   - react-native-app-auth (8.0.1):
     - AppAuth (>= 1.7.6)
     - React-Core
+  - react-native-get-random-values (1.11.0):
+    - React-Core
   - react-native-passkey (3.0.0):
     - RCT-Folly
     - RCTRequired
@@ -1944,6 +1946,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-passkey (from `../node_modules/react-native-passkey`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -2095,6 +2098,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-app-auth:
     :path: "../node_modules/react-native-app-auth"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-passkey:
     :path: "../node_modules/react-native-passkey"
   react-native-safe-area-context:
@@ -2224,6 +2229,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 7eb5d69e1154e7743487ef0c8d7261e5b59afb32
   React-microtasksnativemodule: 01dd998649ff5f8814846b7eee84c4d57f5d3671
   react-native-app-auth: 0dd956abd9201fc06f7b4a71f0740836e2532014
+  react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-passkey: f3fb1bf5720316bd514fe3afb798c1c62463b8a0
   react-native-safe-area-context: 0f16e24dc808e9f0ced17f2bdcec692b2376fb68
   React-nativeconfig: f7ab6c152e780b99a8c17448f2d99cf5f69a2311

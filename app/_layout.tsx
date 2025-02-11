@@ -1,19 +1,19 @@
-import '~/global.css';
+import "~/global.css";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DarkTheme,
   DefaultTheme,
   Theme,
   ThemeProvider,
-} from '@react-navigation/native';
-import { SplashScreen, Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import * as React from 'react';
-import { Platform } from 'react-native';
-import { NAV_THEME } from '~/lib/constants';
-import { useColorScheme } from '~/lib/useColorScheme';
-import { PortalHost } from '@rn-primitives/portal';
+} from "@react-navigation/native";
+import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as React from "react";
+import { Platform } from "react-native";
+import { NAV_THEME } from "~/lib/constants";
+import { useColorScheme } from "~/lib/useColorScheme";
+import { PortalHost } from "@rn-primitives/portal";
 import {
   Inter_900Black,
   Inter_400Regular,
@@ -23,13 +23,13 @@ import {
   Inter_800ExtraBold,
   Inter_300Light,
   useFonts,
-} from '@expo-google-fonts/inter';
-import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
-import { Providers } from '~/providers';
-import { Toaster } from 'sonner-native';
-import { Text } from '~/components/ui/text';
+} from "@expo-google-fonts/inter";
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import { Providers } from "~/providers";
+import { Toaster } from "sonner-native";
+import { Text } from "~/components/ui/text";
 
-import { Header } from '~/components/header';
+import { Header } from "~/components/header";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -38,20 +38,20 @@ const LIGHT_THEME: Theme = {
     ...DefaultTheme.fonts,
     regular: {
       ...DefaultTheme.fonts.regular,
-      fontFamily: 'Inter_400Regular',
+      fontFamily: "Inter_400Regular",
     },
     medium: {
       ...DefaultTheme.fonts.medium,
-      fontFamily: 'Inter_500Medium',
+      fontFamily: "Inter_500Medium",
     },
     bold: {
       ...DefaultTheme.fonts.bold,
-      fontFamily: 'Inter_700Bold',
-      fontWeight: '700',
+      fontFamily: "Inter_700Bold",
+      fontWeight: "700",
     },
     heavy: {
       ...DefaultTheme.fonts.heavy,
-      fontFamily: 'Inter_800ExtraBold',
+      fontFamily: "Inter_800ExtraBold",
     },
   },
 };
@@ -64,7 +64,7 @@ const DARK_THEME: Theme = {
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from 'expo-router';
+} from "expo-router";
 
 // Prevent the splash screen from auto-hiding before getting the color scheme.
 SplashScreen.preventAutoHideAsync();
@@ -86,23 +86,23 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     (async () => {
-      const theme = await AsyncStorage.getItem('theme');
-      if (Platform.OS === 'web') {
-        document.documentElement.classList.add('bg-background');
+      const theme = await AsyncStorage.getItem("theme");
+      if (Platform.OS === "web") {
+        document.documentElement.classList.add("bg-background");
       }
       if (!theme) {
-        AsyncStorage.setItem('theme', 'light');
+        AsyncStorage.setItem("theme", "light");
         setIsColorSchemeLoaded(true);
         return;
       }
-      const colorTheme = theme === 'dark' ? 'dark' : 'light';
+      const colorTheme = theme === "dark" ? "dark" : "light";
       if (colorTheme !== colorScheme) {
-        setColorScheme('light');
-        setAndroidNavigationBar('light');
+        setColorScheme("light");
+        setAndroidNavigationBar("light");
         setIsColorSchemeLoaded(true);
         return;
       }
-      setAndroidNavigationBar('light');
+      setAndroidNavigationBar("light");
       setIsColorSchemeLoaded(true);
     })().finally(() => {
       if (loaded || error) {
@@ -129,7 +129,13 @@ export default function RootLayout() {
             name="dashboard"
             options={{
               header: () => <Header />,
-              title: '',
+              title: "",
+            }}
+          />
+          <Stack.Screen
+            name="import-wallet"
+            options={{
+              title: "Import Wallet",
             }}
           />
           <Stack.Screen
@@ -141,7 +147,7 @@ export default function RootLayout() {
           <Stack.Screen
             name="settings"
             options={{
-              title: 'Settings',
+              title: "Settings",
             }}
           />
         </Stack>
