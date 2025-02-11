@@ -25,6 +25,8 @@ import {
   TURNKEY_PARENT_ORG_ID,
   TURNKEY_RP_ID,
 } from "~/lib/constants";
+import { decryptExportBundle } from "@turnkey/crypto";
+
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -105,8 +107,9 @@ export interface TurnkeyClientType {
     oidcToken: string;
     providerName: string;
     targetPublicKey: string;
-    expirationSeconds: string
-  })=> Promise<void>;
+    expirationSeconds: string;
+  }) => Promise<void>;
+  exportWallet: (params: { walletId: string }) => Promise<string>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -122,6 +125,7 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
   loginWithOAuth: async () => Promise.resolve(),
+  exportWallet: async () => Promise.resolve(""),
   logout: async () => Promise.resolve(),
   clearError: () => {},
 });
@@ -137,8 +141,13 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const [user, setUser] = useState<User | undefined>(undefined);
   const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
-  const { createEmbeddedKey, createSession, session, clearSession } =
-    useSession();
+  const {
+    createEmbeddedKey,
+    getEmbeddedKey,
+    createSession,
+    session,
+    clearSession,
+  } = useSession();
 
   useEffect(() => {
     if (session) {
@@ -492,6 +501,43 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     }
   };
 
+  const exportWallet = async ({ walletId }: { walletId: string }): Promise<string> => {
+    try {
+      const targetPublicKey = await createEmbeddedKey();
+
+      if (client == null || user == null) {
+        throw new Error("Client or user not initialized");
+      }
+
+      const response = await client.exportWallet({
+        type: "ACTIVITY_TYPE_EXPORT_WALLET",
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters: { walletId, targetPublicKey },
+      });
+
+      const exportBundle =
+        response.activity.result.exportWalletResult?.exportBundle;
+      const embeddedKey = await getEmbeddedKey();
+      if (exportBundle == null || embeddedKey == null) {
+        throw new Error("Export bundle, embedded key, or user not initialized");
+      }
+
+      return await decryptExportBundle({
+        exportBundle,
+        embeddedKey,
+        organizationId: user.organizationId,
+        returnMnemonic: true,
+        dangerouslyOverrideSignerPublicKey: "04bce6666ca6c12e0e00a503a52c301319687dca588165b551d369496bd1189235bd8302ae5e001fde51d1e22baa1d44249f2de9705c63797316fc8b7e3969a665",
+      });
+
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+      console.log("error", error);
+      throw error;
+   } 
+  };
+
   const logout = async () => {
     await clearSession();
     router.replace("/");
@@ -514,6 +560,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         signUpWithPasskey,
         loginWithPasskey,
         loginWithOAuth,
+        exportWallet,
         logout,
         clearError,
       }}
