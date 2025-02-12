@@ -3,15 +3,15 @@
   "main": "index.js",
   "version": "0.0.0",
   "scripts": {
-    "dev": "expo start -c --ios",
-    "dev:web": "expo start -c --web",
-    "dev:android": "expo start -c --android",
-    "android": "expo start -c --android",
-    "ios": "expo start -c --ios",
-    "web": "expo start -c --web",
-    "api": "vercel dev",
-    "clean": "rm -rf .expo node_modules",
-    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
+  "dev": "npx expo prebuild && npx expo run:ios",
+  "dev:web": "expo start -c --web",
+  "dev:android": "npx expo prebuild && npx expo run:android",
+  "android": "npx expo run:android",
+  "ios": "npx expo run:ios",
+  "web": "expo start -c --web",
+  "api": "vercel dev",
+  "clean": "rm -rf .expo node_modules",
+  "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",
@@ -26,7 +26,7 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@turnkey/api-key-stamper": "^0.4.3",
-    "@turnkey/crypto": "file:./turnkey-crypto-2.3.0.tgz",
+    "@turnkey/crypto": "^2.3.0",
     "@turnkey/http": "^2.16.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.0",
     "@turnkey/sdk-server": "^1.6.0",
