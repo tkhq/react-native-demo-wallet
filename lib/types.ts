@@ -2,6 +2,7 @@ import { type TurnkeyApiTypes } from '@turnkey/sdk-server';
 import { type Hex } from 'viem';
 
 export type Attestation = TurnkeyApiTypes['v1Attestation'];
+export type WalletAccountParams = TurnkeyApiTypes['v1WalletAccountParams'];
 
 export type Email = `${string}@${string}.${string}`;
 

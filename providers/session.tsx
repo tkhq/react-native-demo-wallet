@@ -22,6 +22,7 @@ type Session = {
 export interface SessionContextType {
   session: Session | null;
   createEmbeddedKey: () => Promise<string>;
+  getEmbeddedKey: (deleteKey?: boolean) => Promise<string | null>;
   createSession: (bundle: string, expiry?: number) => Promise<Session>;
   clearSession: () => Promise<void>;
 }
@@ -143,6 +144,7 @@ export const SessionProvider: React.FC<{
       value={{
         session,
         createEmbeddedKey,
+        getEmbeddedKey,
         createSession,
         clearSession,
       }}
