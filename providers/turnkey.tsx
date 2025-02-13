@@ -13,12 +13,11 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useSession } from "~/hooks/use-session";
+import { useSession } from "@turnkey/react-native-sessions";
 import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
 import { getAddress } from "viem";
 import {
-  OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
   PASSKEY_APP_NAME,
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
@@ -303,7 +302,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 
@@ -361,7 +359,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 

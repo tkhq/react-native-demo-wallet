@@ -6,9 +6,9 @@ import { Button } from "../ui/button";
 import { Platform, View } from "react-native";
 import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "~/lib/constants";
 import * as Crypto from "expo-crypto";
-import { useSession } from "~/hooks/use-session";
 import GoogleIcon from "../../assets/svgs/google.svg";
 import AppleIcon from "../../assets/svgs/apple.svg";
+import { useSession } from "@turnkey/react-native-sessions";
 
 interface OAuthProps {
   onSuccess: (params: {

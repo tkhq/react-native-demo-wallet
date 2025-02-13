@@ -17,9 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "xyz.tkhqlabs.passkeyapp",
-      "associatedDomains": [
-        "webcredentials:passkeyapp.tkhqlabs.xyz"
-      ],
+      "associatedDomains": ["webcredentials:passkeyapp.tkhqlabs.xyz"],
       "infoPlist": {
         "CFBundleURLTypes": [
           {
@@ -57,13 +55,7 @@
           }
         }
       ],
-      "expo-font",
-      [
-        "expo-secure-store",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
-        }
-      ]
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
