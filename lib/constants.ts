@@ -17,6 +17,17 @@ export const NAV_THEME = {
   },
 };
 
+export const DEFAULT_ETHEREUM_ACCOUNTS = [
+  {
+    curve: "CURVE_SECP256K1" as const,  
+    pathFormat: "PATH_FORMAT_BIP32" as const,  
+    path: "m/44'/60'/0'/0/0",
+    addressFormat: "ADDRESS_FORMAT_ETHEREUM" as const, 
+  },
+];
+
+
+
 export const PASSKEY_APP_NAME = process.env.EXPO_PUBLIC_PASSKEY_APP_NAME ?? "";
 export const TURNKEY_PARENT_ORG_ID =
   process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "";
