@@ -24,7 +24,11 @@ import {
   TURNKEY_PARENT_ORG_ID,
   TURNKEY_RP_ID,
 } from "~/lib/constants";
-import { decryptExportBundle, encryptWalletToBundle } from "@turnkey/crypto";
+import {
+  decryptExportBundle,
+  encryptWalletToBundle,
+  generateP256KeyPair,
+} from "@turnkey/crypto";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -115,7 +119,8 @@ export interface TurnkeyClientType {
   createWallet: (params: {
     walletName: string;
     accounts: WalletAccountParams[];
-    mnemonicLength?: number; }) => Promise<void>;
+    mnemonicLength?: number;
+  }) => Promise<void>;
   exportWallet: (params: { walletId: string }) => Promise<string>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -274,7 +279,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         organizationId: user.organizationId,
         parameters,
       });
-
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -521,7 +525,10 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     walletId: string;
   }): Promise<string> => {
     try {
-      const targetPublicKey = await createEmbeddedKey();
+      const {
+        publicKeyUncompressed: targetPublicKey,
+        privateKey: embeddedKey,
+      } = generateP256KeyPair();
 
       if (client == null || user == null) {
         throw new Error("Client or user not initialized");
@@ -536,7 +543,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       const exportBundle =
         response.activity.result.exportWalletResult?.exportBundle;
-      const embeddedKey = await getEmbeddedKey();
       if (exportBundle == null || embeddedKey == null) {
         throw new Error("Export bundle, embedded key, or user not initialized");
       }

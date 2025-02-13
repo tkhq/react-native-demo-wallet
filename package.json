@@ -26,7 +26,7 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@turnkey/api-key-stamper": "^0.4.3",
-    "@turnkey/crypto": "^2.3.0",
+    "@turnkey/crypto": "^2.3.1",
     "@turnkey/http": "^2.16.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.0",
     "@turnkey/sdk-server": "^1.6.0",
