@@ -154,19 +154,14 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const [user, setUser] = useState<User | undefined>(undefined);
   const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
-  const {
-    createEmbeddedKey,
-    getEmbeddedKey,
-    createSession,
-    session,
-    clearSession,
-  } = useSession();
+  const { createEmbeddedKey, createSession, session, clearSession } =
+    useSession();
 
   const fetchAndSetUserData = async () => {
     if (session) {
       const stamper = new ApiKeyStamper({
         apiPrivateKey: session.privateKey,
-        apiPublicKey: session.publicKey.slice(2),
+        apiPublicKey: session.publicKey,
       });
       const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
       setClient(client);
@@ -506,7 +501,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.credentialBundle) {
-        await createSession(response.credentialBundle);
+        await createSession(response.credentialBundle, 30);
         router.push("/dashboard");
       }
     } catch (error: any) {

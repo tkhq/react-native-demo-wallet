@@ -29,7 +29,7 @@
     "@turnkey/crypto": "^2.3.1",
     "@turnkey/http": "^2.16.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.0",
-    "@turnkey/react-native-sessions": "^0.1.0",
+    "@turnkey/react-native-sessions": "https://pkg.csb.dev/tkhq/sdk/commit/aa5d1da9/@turnkey/react-native-sessions",
     "@turnkey/sdk-server": "^1.6.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -56,10 +56,7 @@
     "react-native-drawer-layout": "^4.0.4",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-get-random-values": "^1.11.0",
-<<<<<<< HEAD
-=======
     "react-native-keychain": "^8.1.0",
->>>>>>> 6cbc2ef (migrated to use @turnkey/react-native-sessions)
     "react-native-otp-entry": "^1.7.3",
     "react-native-passkey": "^3.0.0",
     "react-native-reanimated": "~3.16.1",
