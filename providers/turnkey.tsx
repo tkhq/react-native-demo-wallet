@@ -13,12 +13,11 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useSession } from "~/hooks/use-session";
+import { useSession } from "@turnkey/react-native-sessions";
 import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
 import { getAddress } from "viem";
 import {
-  OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
   PASSKEY_APP_NAME,
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
@@ -155,19 +154,14 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   const [user, setUser] = useState<User | undefined>(undefined);
   const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
-  const {
-    createEmbeddedKey,
-    getEmbeddedKey,
-    createSession,
-    session,
-    clearSession,
-  } = useSession();
+  const { createEmbeddedKey, createSession, session, clearSession } =
+    useSession();
 
   const fetchAndSetUserData = async () => {
     if (session) {
       const stamper = new ApiKeyStamper({
         apiPrivateKey: session.privateKey,
-        apiPublicKey: session.publicKey.slice(2),
+        apiPublicKey: session.publicKey,
       });
       const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
       setClient(client);
@@ -303,7 +297,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 
@@ -361,7 +354,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 
@@ -509,7 +501,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.credentialBundle) {
-        await createSession(response.credentialBundle);
+        await createSession(response.credentialBundle, 30);
         router.push("/dashboard");
       }
     } catch (error: any) {
