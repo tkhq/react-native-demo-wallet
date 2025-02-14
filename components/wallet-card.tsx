@@ -44,6 +44,8 @@ export const WalletCard = (props: WalletCardProps) => {
     useState<SignRawPayloadResult | null>(null);
   const [modalType, setModalType] = useState<"export" | "sign" | null>(null);
 
+  const unsignedMessage = "I love Turnkey!";
+
   useEffect(() => {
     (async () => {
       if (wallet.accounts.length > 0) {
@@ -65,15 +67,13 @@ export const WalletCard = (props: WalletCardProps) => {
   };
 
   const handleSignWithWallet = async () => {
-    setSignedMessage(null); 
+    setSignedMessage(null);
     setModalType("sign");
   };
 
   const confirmSignMessage = async () => {
-    const messageToSign = "I love Turnkey!";
-
     try {
-      const hashedMessage = keccak256(toBytes(messageToSign));
+      const hashedMessage = keccak256(toBytes(unsignedMessage));
 
       const response = await signRawPayload({
         signWith: selectedAccount?.address as string,
@@ -137,9 +137,10 @@ export const WalletCard = (props: WalletCardProps) => {
       />
       <SignMessageModal
         visible={modalType === "sign"}
+        unSignedMessage={unsignedMessage}
+        signedMessage={signedMessage}
         onClose={() => setModalType(null)}
         onSign={confirmSignMessage}
-        signedMessage={signedMessage}
       />
     </>
   );
@@ -147,8 +148,8 @@ export const WalletCard = (props: WalletCardProps) => {
 
 interface ExportSeedPhraseModalProps {
   visible: boolean;
-  onClose: () => void;
   seedPhrase: string | null;
+  onClose: () => void;
 }
 
 const ExportSeedPhraseModal = ({
@@ -176,10 +177,7 @@ const ExportSeedPhraseModal = ({
               </View>
             </View>
           </BaseButton>
-          <Button
-            onPress={onClose}
-            className="mt-8 p-3 rounded-lg bg-blue-600"
-          >
+          <Button onPress={onClose} className="mt-8 p-3 rounded-lg bg-blue-600">
             <Text className="text-white text-center font-bold">Done</Text>
           </Button>
         </View>
@@ -190,16 +188,18 @@ const ExportSeedPhraseModal = ({
 
 interface SignMessageModalProps {
   visible: boolean;
+  unSignedMessage: string;
+  signedMessage: SignRawPayloadResult | null;
   onClose: () => void;
   onSign: () => void;
-  signedMessage: SignRawPayloadResult | null;
 }
 
 const SignMessageModal = ({
   visible,
+  unSignedMessage,
+  signedMessage,
   onClose,
   onSign,
-  signedMessage,
 }: SignMessageModalProps) => {
   return (
     <Modal
@@ -214,16 +214,21 @@ const SignMessageModal = ({
             Sign Message
           </Text>
           <View className="p-4 bg-gray-200 rounded-lg">
-            <Text className="text-center">I love Turnkey!</Text>
+            <Text className="text-center">{unSignedMessage}</Text>
           </View>
 
           {signedMessage ? (
             <View>
-              <View className="mt-4 p-4 bg-gray-100 rounded-lg">
+              <View className="mt-4 p-4 bg-gray-100 rounded-lg gap-4">
                 <Text className="font-semibold">Signed Result:</Text>
-                <Text className="break-all">r: {signedMessage.r}</Text>
-                <Text className="break-all">s: {signedMessage.s}</Text>
-                <Text className="break-all">v: {signedMessage.v}</Text>
+                {(["r", "s", "v"] as const).map((key) => (
+                  <View key={key} className="flex flex-row items-center gap-2 pr-2">
+                    <Text className="text-black font-bold text-lg">{key}:</Text>
+                    <Text className="text-black text-base font-normal">
+                      {signedMessage[key]}
+                    </Text>
+                  </View>
+                ))}
               </View>
               <Button
                 onPress={onClose}
