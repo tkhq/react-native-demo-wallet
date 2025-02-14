@@ -6,7 +6,7 @@ interface EmailInputProps {
   initialValue?: string;
 }
 
-function EmailInput({ onEmailChange, initialValue }: EmailInputProps) {
+export const EmailInput =({ onEmailChange, initialValue }: EmailInputProps) => {
   const [email, setEmail] = React.useState(initialValue ?? '');
 
   const handleEmailChange = (text: string) => {
@@ -28,5 +28,3 @@ function EmailInput({ onEmailChange, initialValue }: EmailInputProps) {
     />
   );
 }
-
-export default EmailInput;

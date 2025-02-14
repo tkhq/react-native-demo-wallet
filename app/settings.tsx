@@ -1,24 +1,24 @@
-import { View } from 'react-native';
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
-import { useTurnkey } from '~/hooks/use-turnkey';
-import { useEffect, useState } from 'react';
-import { isValidEmail, isValidPhone } from '~/lib/utils';
-import EmailInput from '~/components/auth/auth.email';
-import PhoneNumberInput from '~/components/auth/auth.phone';
+import { View } from "react-native";
+import { Text } from "~/components/ui/text";
+import { Button } from "~/components/ui/button";
+import { useTurnkey } from "~/hooks/use-turnkey";
+import { useEffect, useState } from "react";
+import { isValidEmail, isValidPhone } from "~/lib/utils";
+import { EmailInput } from "~/components/auth/auth.email";
+import { PhoneNumberInput } from "~/components/auth/auth.phone";
 
 const Settings = () => {
   const { updateUser, user } = useTurnkey();
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   const handleUpdateUser = async () => {
     await updateUser({ email, phone });
   };
 
   useEffect(() => {
-    setEmail(user?.email ?? '');
-    setPhone(user?.phoneNumber ?? '');
+    setEmail(user?.email ?? "");
+    setPhone(user?.phoneNumber ?? "");
   }, [user]);
 
   const onPhoneChange = (phone: string) => {
@@ -34,7 +34,10 @@ const Settings = () => {
         initialValue={user?.phoneNumber}
         onPhoneChange={onPhoneChange}
       />
-      <Button onPress={handleUpdateUser} disabled={!isValidEmail && !isValidPhone}>
+      <Button
+        onPress={handleUpdateUser}
+        disabled={!isValidEmail && !isValidPhone}
+      >
         <Text>Update</Text>
       </Button>
     </View>

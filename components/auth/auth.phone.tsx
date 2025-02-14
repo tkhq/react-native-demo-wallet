@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,49 +6,60 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import countries from "i18n-iso-countries";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
+import emojiFlags from "emoji-flags";
+import enLocale from "i18n-iso-countries/langs/en.json";
 
-// TODO: we need a better way of handling country codes and flags
-// for the React Auth component, we use react-international-phone, but this is not available for react-native
-const countries = [
-  { name: "United States", code: "+1", flag: "🇺🇸" },
-  { name: "Canada", code: "+1", flag: "🇨🇦" },
-];
+countries.registerLocale(enLocale);
 
-const formatPhoneNumber = (phoneNumber: string) => {
-  if (phoneNumber.length === 0) return "";
-  if (phoneNumber.length <= 3) {
-    return `(${phoneNumber}`;
-  } else if (phoneNumber.length <= 6) {
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-  } else {
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-  }
-};
+const UNSUPPORTED_COUNTRY_CODES = new Set([
+  "+93", // Afghanistan
+  "+964", // Iraq
+  "+963", // Syria
+  "+249", // Sudan
+  "+98", // Iran
+  "+850", // North Korea
+  "+53", // Cuba
+  "+250", // Rwanda
+  "+379", // Vatican City
+]);
 
-const PhoneNumberInput = ({
-  onPhoneChange,
-  initialValue,
-}: {
+interface Country {
+  name: string;
+  code: string;
+  iso2: string;
+  flag: string;
+}
+
+export interface PhoneNumberInputProps {
   onPhoneChange: (phone: string) => void;
   initialValue?: string;
+}
+
+export const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
+  onPhoneChange,
+  initialValue,
 }) => {
+  const countryList = useCountryList();
+
+  // defualt to the United States
+  const defaultCountry =
+    countryList.find((c) => c.iso2 === "US") || countryList[0];
+
   const [phone, setPhone] = useState(initialValue ?? "");
-  const [callingCode, setCallingCode] = useState({
-    code: countries[0].code,
-    flag: countries[0].flag,
-  });
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [selectedCountry, setSelectedCountry] =
+    useState<Country>(defaultCountry);
 
   const handlePhoneChange = (text: string) => {
     const cleaned = text.replace(/\D/g, "");
     setPhone(cleaned);
-
-    const phoneWithCode = `${callingCode.code}${cleaned}`;
-    onPhoneChange(phoneWithCode);
+    onPhoneChange(`${selectedCountry.code}${cleaned}`);
   };
 
-  const selectCountry = (country: { code: string; flag: any }) => {
-    setCallingCode(country);
+  const selectCountry = (country: Country) => {
+    setSelectedCountry(country);
     setDropdownVisible(false);
   };
 
@@ -59,9 +70,11 @@ const PhoneNumberInput = ({
           className="flex flex-row items-center mr-2"
           onPress={() => setDropdownVisible((prev) => !prev)}
         >
-          <Text className="text-base font-normal">{callingCode.flag}</Text>
+          <Text className="text-base font-normal">{selectedCountry.flag}</Text>
           <View className="flex flex-row items-center ml-1">
-            <Text className="text-base font-normal">{callingCode.code}</Text>
+            <Text className="text-base font-normal">
+              {selectedCountry.code}
+            </Text>
             <Text className="text-base font-normal ml-1">▾</Text>
           </View>
         </TouchableOpacity>
@@ -71,14 +84,15 @@ const PhoneNumberInput = ({
           keyboardType="phone-pad"
           onChangeText={handlePhoneChange}
           value={formatPhoneNumber(phone)}
-          maxLength={14} 
+          maxLength={14}
         />
       </View>
       {dropdownVisible && (
-        <View className="absolute top-16 left-0 right-0 bg-white border border-gray-300 rounded-md z-10">
+        <View className="absolute top-16 left-0 right-0 bg-white border border-gray-300 rounded-md z-10 max-h-56">
           <FlatList
-            data={countries}
-            keyExtractor={(item) => item.name}
+            data={countryList}
+            keyExtractor={(item) => item.iso2}
+            showsVerticalScrollIndicator
             renderItem={({ item }) => (
               <TouchableOpacity
                 className="flex flex-row items-center justify-between py-2 px-3"
@@ -98,4 +112,29 @@ const PhoneNumberInput = ({
   );
 };
 
-export default PhoneNumberInput;
+const useCountryList = () =>
+  useMemo(
+    () =>
+      getCountries()
+        .filter((iso2) => countries.getName(iso2, "en"))
+        .map((iso2) => {
+          const name = countries.getName(iso2, "en")!;
+          const code = `+${getCountryCallingCode(iso2)}`;
+          const flag = emojiFlags[iso2]?.emoji || "🏳️";
+
+          return { name, code, iso2, flag };
+        })
+        .filter((country) => !UNSUPPORTED_COUNTRY_CODES.has(country.code)),
+    []
+  );
+
+const formatPhoneNumber = (phoneNumber: string) => {
+  if (phoneNumber.length === 0) return "";
+  if (phoneNumber.length <= 3) return `(${phoneNumber}`;
+  if (phoneNumber.length <= 6)
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
+    3,
+    6
+  )}-${phoneNumber.slice(6, 10)}`;
+};
