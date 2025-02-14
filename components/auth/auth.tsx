@@ -8,15 +8,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cn, isValidEmail, isValidPhone } from "~/lib/utils";
 import { BaseButton } from "react-native-gesture-handler";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import EmailInput from "./auth.email";
+import { EmailInput } from "./auth.email";
 import { LoaderButton } from "../ui/loader-button";
 import OrSeparator from "../or-separator";
-import PhoneNumberInput from "./auth.phone";
+import { PhoneNumberInput } from "./auth.phone";
 import { OAuth } from "./oauth";
 
 export const Auth = () => {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useTurnkey();
+  const {
+    state,
+    initEmailLogin,
+    initPhoneLogin,
+    signUpWithPasskey,
+    loginWithPasskey,
+    loginWithOAuth,
+  } = useTurnkey();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -62,7 +69,9 @@ export const Auth = () => {
               disabled={!!state.loading || !isValidPhone(phone)}
               loading={state.loading === LoginMethod.Phone}
               onPress={() => initPhoneLogin(phone)}
-              className={cn("rounded-xl", { "border-black": isValidPhone(phone) })}
+              className={cn("rounded-xl", {
+                "border-black": isValidPhone(phone),
+              })}
             >
               <Text>Continue</Text>
             </LoaderButton>
@@ -92,4 +101,4 @@ export const Auth = () => {
       </Card>
     </View>
   );
-}
+};
