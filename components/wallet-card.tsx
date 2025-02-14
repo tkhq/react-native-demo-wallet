@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, Modal, View } from "react-native";
-import { formatEther } from "viem";
+import { formatEther, keccak256, toBytes } from "viem";
 import { Skeleton } from "./ui/skeleton";
 import { truncateAddress } from "~/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -10,6 +10,12 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
+import {
+  HashFunction,
+  PayloadEncoding,
+  SignRawPayloadResult,
+} from "~/lib/types";
+import { SignWithWalletButton } from "./sign";
 
 interface WalletCardProps {
   wallet: {
@@ -18,17 +24,27 @@ interface WalletCardProps {
     name?: string;
   };
   exportWallet: (params: { walletId: string }) => Promise<string>;
+  signRawPayload: (params: {
+    signWith: string;
+    payload: string;
+    encoding: PayloadEncoding;
+    hashFunction: HashFunction;
+  }) => Promise<SignRawPayloadResult>;
 }
 
 export const WalletCard = (props: WalletCardProps) => {
-  const { wallet, exportWallet } = props;
+  const { wallet, exportWallet, signRawPayload } = props;
   const [selectedAccount, setSelectedAccount] = useState<{
     address: `0x${string}`;
     balance: bigint;
     balanceUsd: number;
   } | null>(null);
   const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [signedMessage, setSignedMessage] =
+    useState<SignRawPayloadResult | null>(null);
+  const [modalType, setModalType] = useState<"export" | "sign" | null>(null);
+
+  const unsignedMessage = "I love Turnkey!";
 
   useEffect(() => {
     (async () => {
@@ -38,7 +54,7 @@ export const WalletCard = (props: WalletCardProps) => {
         setSelectedAccount({
           address: wallet.accounts[0],
           balance,
-          balanceUsd: Number(formatEther(balance)) * price,
+          balanceUsd: parseFloat(formatEther(balance)) * price,
         });
       }
     })();
@@ -47,15 +63,29 @@ export const WalletCard = (props: WalletCardProps) => {
   const handleExportWallet = async () => {
     const seed = await exportWallet({ walletId: wallet.id });
     setSeedPhrase(seed);
-    setModalVisible(true);
+    setModalType("export");
   };
 
-  const handleCopyWalletAddress = async () => {
-    await navigator.clipboard.writeText(selectedAccount?.address || "");
+  const handleSignWithWallet = async () => {
+    setSignedMessage(null);
+    setModalType("sign");
   };
 
-  const handleCopySeedPhrase = async () => {
-    await navigator.clipboard.writeText(seedPhrase || "");
+  const confirmSignMessage = async () => {
+    try {
+      const hashedMessage = keccak256(toBytes(unsignedMessage));
+
+      const response = await signRawPayload({
+        signWith: selectedAccount?.address as string,
+        payload: hashedMessage,
+        encoding: PayloadEncoding.Hexadecimal,
+        hashFunction: HashFunction.NoOp,
+      });
+
+      setSignedMessage(response);
+    } catch (error) {
+      console.error("Error signing message:", error);
+    }
   };
 
   return (
@@ -68,10 +98,7 @@ export const WalletCard = (props: WalletCardProps) => {
         </CardHeader>
         <CardContent className="space-y-0 gap-2">
           {selectedAccount ? (
-            <TouchableOpacity
-              className="flex flex-row items-center gap-2 w-full"
-              onPress={handleCopyWalletAddress}
-            >
+            <TouchableOpacity className="flex flex-row items-center gap-2 w-full">
               <Text>
                 {truncateAddress(selectedAccount.address, {
                   prefix: 12,
@@ -95,37 +122,139 @@ export const WalletCard = (props: WalletCardProps) => {
               : "0"}{" "}
             ETH
           </Muted>
-          <ExportWalletButton onExportWallet={handleExportWallet} />
+          <View className="flex flex-row items-center gap-4">
+            <ExportWalletButton onExportWallet={handleExportWallet} />
+            <SignWithWalletButton onSignWithWallet={handleSignWithWallet} />
+          </View>
         </CardContent>
       </Card>
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-6 rounded-2xl shadow-lg w-4/5">
-            <Text className="text-lg font-bold mb-3 text-center">
-              Seed Phrase
-            </Text>
-            <BaseButton onPress={handleCopySeedPhrase}>
+
+      {/* Modals */}
+      <ExportSeedPhraseModal
+        visible={modalType === "export"}
+        onClose={() => setModalType(null)}
+        seedPhrase={seedPhrase}
+      />
+      <SignMessageModal
+        visible={modalType === "sign"}
+        unSignedMessage={unsignedMessage}
+        signedMessage={signedMessage}
+        onClose={() => setModalType(null)}
+        onSign={confirmSignMessage}
+      />
+    </>
+  );
+};
+
+interface ExportSeedPhraseModalProps {
+  visible: boolean;
+  seedPhrase: string | null;
+  onClose: () => void;
+}
+
+const ExportSeedPhraseModal = ({
+  visible,
+  onClose,
+  seedPhrase,
+}: ExportSeedPhraseModalProps) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="bg-white p-6 rounded-2xl shadow-lg w-4/5">
+          <Text className="text-lg font-bold mb-3 text-center">
+            Seed Phrase
+          </Text>
+          <BaseButton>
             <View className="p-4 bg-gray-200 rounded-lg">
               <Text className="text-center">{seedPhrase}</Text>
               <View className="bg-transparent pt-2 rounded-lg flex flex-col items-end justify-right">
                 <Icons.copy className="stroke-muted-foreground" size={16} />
               </View>
             </View>
-            </BaseButton>
-            <Button
-              onPress={() => setModalVisible(false)}
-              className="mt-8 p-3 rounded-lg bg-blue-600"
-            >
-              <Text className="text-white text-center font-bold">Done</Text>
-            </Button>
-          </View>
+          </BaseButton>
+          <Button onPress={onClose} className="mt-8 p-3 rounded-lg bg-blue-600">
+            <Text className="text-white text-center font-bold">Done</Text>
+          </Button>
         </View>
-      </Modal>
-    </>
+      </View>
+    </Modal>
+  );
+};
+
+interface SignMessageModalProps {
+  visible: boolean;
+  unSignedMessage: string;
+  signedMessage: SignRawPayloadResult | null;
+  onClose: () => void;
+  onSign: () => void;
+}
+
+const SignMessageModal = ({
+  visible,
+  unSignedMessage,
+  signedMessage,
+  onClose,
+  onSign,
+}: SignMessageModalProps) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="bg-white p-6 rounded-2xl shadow-lg w-4/5">
+          <Text className="text-lg font-bold mb-3 text-center">
+            Sign Message
+          </Text>
+          <View className="p-4 bg-gray-200 rounded-lg">
+            <Text className="text-center">{unSignedMessage}</Text>
+          </View>
+
+          {signedMessage ? (
+            <View>
+              <View className="mt-4 p-4 bg-gray-100 rounded-lg gap-4">
+                <Text className="font-semibold">Signed Result:</Text>
+                {(["r", "s", "v"] as const).map((key) => (
+                  <View key={key} className="flex flex-row items-center gap-2 pr-2">
+                    <Text className="text-black font-bold text-lg">{key}:</Text>
+                    <Text className="text-black text-base font-normal">
+                      {signedMessage[key]}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              <Button
+                onPress={onClose}
+                className="mt-8 p-3 rounded-lg bg-blue-600"
+              >
+                <Text className="text-white text-center font-bold">Done</Text>
+              </Button>
+            </View>
+          ) : (
+            <View className="flex-row justify-between mt-6">
+              <TouchableOpacity
+                onPress={onClose}
+                className="p-3 bg-gray-300 rounded-lg flex-1 mr-2"
+              >
+                <Text className="text-center font-bold">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onSign}
+                className="p-3 bg-blue-600 rounded-lg flex-1"
+              >
+                <Text className="text-white text-center font-bold">Sign</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 };
