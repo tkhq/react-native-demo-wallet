@@ -294,6 +294,8 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         organizationId: user.organizationId,
         parameters,
       });
+
+      await onSessionUpdate();
     } catch (error) {
       console.error("Failed to update user:", error);
     }

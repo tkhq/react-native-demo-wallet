@@ -1,17 +1,46 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { PhoneNumberUtil, RegionCode } from "google-libphonenumber";
+import {
+  CountryCode,
+  CountryCodeList,
+} from "react-native-country-picker-modal";
+
+const phoneUtil = PhoneNumberUtil.getInstance();
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const isValidEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+export interface ParsedPhoneNumber {
+  country: CountryCode;
+  nationalNumber: string;
+}
+
+// parses a full phone number into its country code and national number
+export const parsePhoneNumber = (fullNumber: string): ParsedPhoneNumber => {
+  try {
+    const parsedNumber = phoneUtil.parse(fullNumber);
+    const regionCode = phoneUtil.getRegionCodeForNumber(
+      parsedNumber
+    ) as RegionCode;
+
+    return {
+      country: isValidCountryCode(regionCode) ? regionCode : "US",
+      nationalNumber:
+        parsedNumber.getNationalNumber()?.toString() ||
+        fullNumber.replace(/\D/g, ""),
+    };
+  } catch {
+    return {
+      country: "US",
+      nationalNumber: fullNumber.replace(/\D/g, ""),
+    };
+  }
 };
 
-export const isValidPhone = (phone: string) => {
-  return phone.length === 12;
+const isValidCountryCode = (code: string): code is CountryCode => {
+  return CountryCodeList.includes(code as CountryCode);
 };
 
 export const truncateAddress = (

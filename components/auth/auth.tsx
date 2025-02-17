@@ -5,14 +5,14 @@ import { useTurnkey } from "~/hooks/use-turnkey";
 import { isSupported } from "@turnkey/react-native-passkey-stamper";
 import { Email, LoginMethod } from "~/lib/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { cn, isValidEmail, isValidPhone } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { BaseButton } from "react-native-gesture-handler";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { EmailInput } from "./auth.email";
 import { LoaderButton } from "../ui/loader-button";
 import OrSeparator from "../or-separator";
-import { PhoneNumberInput } from "./auth.phone";
 import { OAuth } from "./oauth";
+import { PhoneInput } from "./auth.phone";
 
 export const Auth = () => {
   const insets = useSafeAreaInsets();
@@ -27,6 +27,9 @@ export const Auth = () => {
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
+
+  const [isValidEmail, setIsValidEmail] = React.useState<boolean>(false);
+  const [isValidPhone, setIsValidPhone] = React.useState<boolean>(false);
 
   const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail);
@@ -50,27 +53,33 @@ export const Auth = () => {
           <View className="gap-6">
             <OAuth onSuccess={loginWithOAuth} />
             <OrSeparator />
-            <EmailInput onEmailChange={handleEmailChange} />
+            <EmailInput
+              onEmailChange={handleEmailChange}
+              onValidationChange={setIsValidEmail}
+            />
             <LoaderButton
               variant="outline"
-              disabled={!!state.loading || !isValidEmail(email)}
+              disabled={!!state.loading || !isValidEmail}
               loading={state.loading === LoginMethod.Email}
               onPress={() => initEmailLogin(email as Email)}
               className={cn("rounded-xl", {
-                "border-black": isValidEmail(email),
+                "border-black": isValidEmail,
               })}
             >
               <Text>Continue</Text>
             </LoaderButton>
             <OrSeparator />
-            <PhoneNumberInput onPhoneChange={handlePhoneChange} />
+            <PhoneInput
+              onChangeText={handlePhoneChange}
+              onValidationChange={setIsValidPhone}
+            />
             <LoaderButton
               variant="outline"
-              disabled={!!state.loading || !isValidPhone(phone)}
+              disabled={!!state.loading || !isValidPhone}
               loading={state.loading === LoginMethod.Phone}
               onPress={() => initPhoneLogin(phone)}
               className={cn("rounded-xl", {
-                "border-black": isValidPhone(phone),
+                "border-black": isValidPhone,
               })}
             >
               <Text>Continue</Text>

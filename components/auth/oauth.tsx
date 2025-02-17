@@ -4,7 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import { makeRedirectUri } from "expo-auth-session";
 import { Button } from "../ui/button";
 import { Platform, View } from "react-native";
-import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "~/lib/constants";
+import {
+  GOOGLE_ANDROID_CLIENT_ID,
+  GOOGLE_IOS_CLIENT_ID,
+} from "~/lib/constants";
 import * as Crypto from "expo-crypto";
 import { useSession } from "~/hooks/use-session";
 import GoogleIcon from "../../assets/svgs/google.svg";
@@ -37,7 +40,8 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
       android: GOOGLE_ANDROID_CLIENT_ID,
     }),
     redirectUri: makeRedirectUri({
-      native: "com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm:/oauthredirect",
+      native:
+        "com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm:/oauthredirect",
     }),
     scopes: ["openid", "profile", "email"],
     extraParams: nonce ? { nonce } : {},
@@ -55,7 +59,7 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
           expirationSeconds: "3600",
         });
 
-        // we refresh the nonce before authentication to ensure a new one is used 
+        // we refresh the nonce before authentication to ensure a new one is used
         // if the user logs out and logs in with oaAuth again
         await refreshNonce();
       }
@@ -106,7 +110,7 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
           expirationSeconds: "3600",
         });
 
-        // we refresh the nonce before authentication to ensure a new one is used 
+        // we refresh the nonce before authentication to ensure a new one is used
         // if the user logs out and logs in with oaAuth again
         await refreshNonce();
       }
