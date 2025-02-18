@@ -13,8 +13,6 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useSession } from "~/hooks/use-session";
-import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import {
   Email,
   HashFunction,
@@ -26,7 +24,6 @@ import {
 } from "~/lib/types";
 import { getAddress } from "viem";
 import {
-  OTP_AUTH_DEFAULT_EXPIRATION_SECONDS,
   PASSKEY_APP_NAME,
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
@@ -37,6 +34,7 @@ import {
   encryptWalletToBundle,
   generateP256KeyPair,
 } from "@turnkey/crypto";
+import { useTurnkey } from "@turnkey/sdk-react-native";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -89,9 +87,8 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
   }
 }
 
-export interface TurnkeyClientType {
+export interface AuthRelayProviderType {
   state: AuthState;
-  user: User | undefined;
   updateUser: ({
     email,
     phone,
@@ -140,9 +137,8 @@ export interface TurnkeyClientType {
   clearError: () => void;
 }
 
-export const TurnkeyContext = createContext<TurnkeyClientType>({
+export const AuthRelayContext = createContext<AuthRelayProviderType>({
   state: initialState,
-  user: undefined,
   updateUser: async () => Promise.resolve(),
   initEmailLogin: async () => Promise.resolve(),
   completeEmailAuth: async () => Promise.resolve(),
@@ -159,86 +155,23 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   clearError: () => {},
 });
 
-interface TurnkeyProviderProps {
+interface AuthRelayProviderProps {
   children: ReactNode;
 }
 
-export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
+export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const [user, setUser] = useState<User | undefined>(undefined);
-  const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
   const {
+    client,
+    user,
+    refreshUser,
     createEmbeddedKey,
-    getEmbeddedKey,
     createSession,
-    session,
     clearSession,
-  } = useSession();
-
-  const fetchAndSetUserData = async () => {
-    if (session) {
-      const stamper = new ApiKeyStamper({
-        apiPrivateKey: session.privateKey,
-        apiPublicKey: session.publicKey.slice(2),
-      });
-      const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
-      setClient(client);
-
-      const whoami = await client.getWhoami({
-        organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
-      });
-
-      if (whoami.userId && whoami.organizationId) {
-        const [walletsResponse, userResponse] = await Promise.all([
-          client.getWallets({
-            organizationId: whoami.organizationId,
-          }),
-          client.getUser({
-            organizationId: whoami.organizationId,
-            userId: whoami.userId,
-          }),
-        ]);
-
-        const wallets = await Promise.all(
-          walletsResponse.wallets.map(async (wallet) => {
-            const accounts = await client.getWalletAccounts({
-              organizationId: whoami.organizationId,
-              walletId: wallet.walletId,
-            });
-            return {
-              name: wallet.walletName,
-              id: wallet.walletId,
-              accounts: accounts.accounts.map((account) =>
-                getAddress(account.address)
-              ),
-            };
-          })
-        );
-
-        const user = userResponse.user;
-
-        setUser({
-          id: user.userId,
-          userName: user.userName,
-          email: user.userEmail,
-          phoneNumber: user.userPhoneNumber,
-          organizationId: whoami.organizationId,
-          wallets,
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchAndSetUserData();
-  }, [session]);
-
-  const onSessionUpdate = async () => {
-    await fetchAndSetUserData();
-  };
+  } = useTurnkey();
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -295,7 +228,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
         parameters,
       });
 
-      await onSessionUpdate();
+      await refreshUser();
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -320,13 +253,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 
         if (response.credentialBundle) {
           await createSession(response.credentialBundle);
-          router.push("/dashboard");
         }
       } catch (error: any) {
         dispatch({ type: "ERROR", payload: error.message });
@@ -378,13 +309,11 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
           otpCode: otpCode,
           organizationId: organizationId,
           targetPublicKey,
-          expirationSeconds: OTP_AUTH_DEFAULT_EXPIRATION_SECONDS.toString(),
           invalidateExisting: false,
         });
 
         if (response.credentialBundle) {
           await createSession(response.credentialBundle);
-          router.push("/dashboard");
         }
       } catch (error: any) {
         dispatch({ type: "ERROR", payload: error.message });
@@ -453,7 +382,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
         if (credentialBundle) {
           await createSession(credentialBundle);
-          router.push("/dashboard");
         }
       }
     } catch (error: any) {
@@ -496,7 +424,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (credentialBundle) {
         await createSession(credentialBundle);
-        router.push("/dashboard");
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -527,7 +454,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (response.credentialBundle) {
         await createSession(response.credentialBundle);
-        router.push("/dashboard");
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -620,7 +546,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.activity.result.importWalletResult?.walletId != null) {
-        await onSessionUpdate();
+        await refreshUser();
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -655,7 +581,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.activity.result.createWalletResult?.walletId != null) {
-        await onSessionUpdate();
+        await refreshUser();
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -702,7 +628,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
   const logout = async () => {
     await clearSession();
-    router.replace("/");
   };
 
   const clearError = () => {
@@ -710,10 +635,9 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   };
 
   return (
-    <TurnkeyContext.Provider
+    <AuthRelayContext.Provider
       value={{
         state,
-        user,
         updateUser,
         initEmailLogin,
         completeEmailAuth,
@@ -731,6 +655,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       }}
     >
       {children}
-    </TurnkeyContext.Provider>
+    </AuthRelayContext.Provider>
   );
 };

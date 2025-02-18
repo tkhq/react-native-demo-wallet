@@ -54,8 +54,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoSecureStore (14.0.0):
-    - ExpoModulesCore
   - ExpoSplashScreen (0.29.18):
     - ExpoModulesCore
   - ExpoSystemUI (4.0.6):
@@ -1712,6 +1710,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNKeychain (8.1.0):
+    - React-Core
   - RNReanimated (3.16.3):
     - DoubleConversion
     - glog
@@ -1906,7 +1906,6 @@ DEPENDENCIES:
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
-  - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
@@ -1979,6 +1978,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -2021,8 +2021,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-linking/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
-  ExpoSecureStore:
-    :path: "../node_modules/expo-secure-store/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
@@ -2164,6 +2162,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNKeychain:
+    :path: "../node_modules/react-native-keychain"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2190,7 +2190,6 @@ SPEC CHECKSUMS:
   ExpoLinearGradient: 18148bd38f98fa0229c1f9df23393b32ab6d2d32
   ExpoLinking: 8d12bee174ba0cdf31239706578e29e74a417402
   ExpoModulesCore: 5c2036ec792be80ebf777ba5bbe197f20d9b6eed
-  ExpoSecureStore: c9fa9d97af1472ddd579bc319762c1eb704afae9
   ExpoSplashScreen: 5397c2419fb3ca0788de37ea2547deac376aad83
   ExpoSystemUI: 778d700c6f38d3d7b8794460f50c1ca05c4f7462
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
@@ -2262,6 +2261,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: ff8f69859448bde50f1c25d3e7eb37555fed33ab
   RNCClipboard: 356f0acf1d62d41398269d5f47b1d950c2a593fe
   RNGestureHandler: 16ef3dc2d7ecb09f240f25df5255953c4098819b
+  RNKeychain: ebe246c398e0a6ff362e502407972b9ead9f42b0
   RNReanimated: 4335a2d4b358c01a28fe1881db59d897e8724681
   RNScreens: 1b1282f5fd21119667bb361d736d4edaca3c35e0
   RNSVG: c50d29abf38abbf48ebfc50b6258f81099aeabae

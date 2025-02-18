@@ -2,13 +2,13 @@ import { DEFAULT_ETHEREUM_ACCOUNTS } from "~/lib/constants";
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTurnkey } from "~/hooks/use-turnkey";
+import { useAuthRelay } from "~/hooks/use-turnkey";
 import { useRouter } from "expo-router";
 
 const ImportWalletScreen = ({ navigation }: { navigation: any }) => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { importWallet } = useTurnkey();
+  const { importWallet } = useAuthRelay();
 
   const [walletName, setWalletName] = useState("");
   const [seedPhrase, setSeedPhrase] = useState("");

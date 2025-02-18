@@ -9,9 +9,9 @@ import {
   GOOGLE_IOS_CLIENT_ID,
 } from "~/lib/constants";
 import * as Crypto from "expo-crypto";
-import { useSession } from "~/hooks/use-session";
 import GoogleIcon from "../../assets/svgs/google.svg";
 import AppleIcon from "../../assets/svgs/apple.svg";
+import { useTurnkey } from "@turnkey/sdk-react-native";
 
 interface OAuthProps {
   onSuccess: (params: {
@@ -133,7 +133,7 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
 };
 
 export const useEmbeddedKeyAndNonce = () => {
-  const { createEmbeddedKey } = useSession();
+  const { createEmbeddedKey } = useTurnkey();
 
   const [targetPublicKey, setTargetPublicKey] = useState<string | null>(null);
   const [nonce, setNonce] = useState<string | null>(null);
