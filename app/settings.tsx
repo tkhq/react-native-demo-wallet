@@ -1,44 +1,57 @@
-import { View } from 'react-native';
-import { Text } from '~/components/ui/text';
-import { Button } from '~/components/ui/button';
-import { useAuthRelay } from '~/hooks/use-turnkey';
-import { useEffect, useState } from 'react';
-import { isValidEmail, isValidPhone } from '~/lib/utils';
-import EmailInput from '~/components/auth/auth.email';
-import PhoneNumberInput from '~/components/auth/auth.phone';
+import { Keyboard, View } from "react-native";
+import { Text } from "~/components/ui/text";
+import { useState } from "react";
+import { parsePhoneNumber } from "~/lib/utils";
+import { EmailInput } from "~/components/auth/auth.email";
+import { LoaderButton } from "~/components/ui/loader-button";
+import { PhoneInput } from "~/components/auth/auth.phone";
 import { useTurnkey } from '@turnkey/sdk-react-native';
+import { useAuthRelay } from '~/hooks/use-turnkey';
 
 const Settings = () => {
   const { user } = useTurnkey();
   const { updateUser } = useAuthRelay();
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+
+  const [email, setEmail] = useState<string>(user?.email || "");
+  const [phone, setPhone] = useState<string>(user?.phoneNumber || "");
+
+  const [isValidEmail, setIsValidEmail] = useState<boolean>(
+    user?.email ? true : false
+  );
+  const [isValidPhone, setIsValidPhone] = useState<boolean>(
+    user?.phoneNumber ? true : false
+  );
+
+  const { country, nationalNumber } = parsePhoneNumber(phone);
 
   const handleUpdateUser = async () => {
     await updateUser({ email, phone });
+    Keyboard.dismiss();
   };
 
-  useEffect(() => {
-    setEmail(user?.email ?? '');
-    setPhone(user?.phoneNumber ?? '');
-  }, [user]);
-
-  const onPhoneChange = (phone: string) => {
-    setPhone(phone);
-  };
+  const isDisabled =
+    !isValidEmail ||
+    !isValidPhone ||
+    (email === user?.email && phone === user?.phoneNumber);
 
   return (
     <View className="flex-1 p-5 gap-4">
       <Text className="font-medium">Email</Text>
-      <EmailInput initialValue={user?.email} onEmailChange={setEmail} />
-      <Text className="font-medium">Phone</Text>
-      <PhoneNumberInput
-        initialValue={user?.phoneNumber}
-        onPhoneChange={onPhoneChange}
+      <EmailInput
+        initialValue={user?.email}
+        onEmailChange={setEmail}
+        onValidationChange={setIsValidEmail}
       />
-      <Button onPress={handleUpdateUser} disabled={!isValidEmail && !isValidPhone}>
-        <Text>Update</Text>
-      </Button>
+      <Text className="font-medium">Phone</Text>
+      <PhoneInput
+        initialCountry={country}
+        initialPhoneNumber={nationalNumber}
+        onChangeText={setPhone}
+        onValidationChange={setIsValidPhone}
+      />
+      <LoaderButton onPress={handleUpdateUser} disabled={isDisabled}>
+        <Text className="text-white">Update</Text>
+      </LoaderButton>
     </View>
   );
 };

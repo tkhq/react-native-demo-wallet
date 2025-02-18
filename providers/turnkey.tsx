@@ -13,8 +13,18 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useTurnkey } from "@turnkey/sdk-react-native";
-import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
+import { useSession } from "~/hooks/use-session";
+import { ApiKeyStamper } from "@turnkey/api-key-stamper";
+import {
+  Email,
+  HashFunction,
+  LoginMethod,
+  PayloadEncoding,
+  SignRawPayloadResult,
+  User,
+  WalletAccountParams,
+} from "~/lib/types";
+import { getAddress } from "viem";
 import {
   PASSKEY_APP_NAME,
   TURNKEY_API_URL,
@@ -118,6 +128,12 @@ export interface AuthRelayProviderType {
     mnemonicLength?: number;
   }) => Promise<void>;
   exportWallet: (params: { walletId: string }) => Promise<string>;
+  signRawPayload: (params: {
+    signWith: string;
+    payload: string;
+    encoding: PayloadEncoding;
+    hashFunction: HashFunction;
+  }) => Promise<SignRawPayloadResult>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -135,6 +151,7 @@ export const AuthRelayContext = createContext<AuthRelayProviderType>({
   importWallet: async () => Promise.resolve(),
   createWallet: async () => Promise.resolve(),
   exportWallet: async () => Promise.resolve(""),
+  signRawPayload: async () => Promise.resolve(undefined),
   logout: async () => Promise.resolve(),
   clearError: () => {},
 });
@@ -211,6 +228,8 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
         organizationId: user.organizationId,
         parameters,
       });
+
+      await onSessionUpdate();
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -572,6 +591,42 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
     }
   };
 
+  const signRawPayload = async ({
+    signWith,
+    payload,
+    encoding,
+    hashFunction,
+  }: {
+    signWith: string;
+    payload: string;
+    encoding: PayloadEncoding;
+    hashFunction: HashFunction;
+  }): Promise<SignRawPayloadResult> => {
+    try {
+      if (client == null || user == null) {
+        throw new Error("Client or user not initialized");
+      }
+
+      const response = await client.signRawPayload({
+        type: "ACTIVITY_TYPE_SIGN_RAW_PAYLOAD_V2",
+        timestampMs: Date.now().toString(),
+        organizationId: user.organizationId,
+        parameters: {
+          signWith,
+          payload,
+          encoding,
+          hashFunction,
+        },
+      });
+
+      return response.activity.result.signRawPayloadResult;
+    } catch (error: any) {
+      dispatch({ type: "ERROR", payload: error.message });
+      console.log("error", error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     await clearSession();
   };
@@ -595,6 +650,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
         importWallet,
         createWallet,
         exportWallet,
+        signRawPayload,
         logout,
         clearError,
       }}
