@@ -1,7 +1,7 @@
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SessionProvider } from '@turnkey/react-native-sessions';
-import { TurnkeyProvider } from './turnkey';
+import { TurnkeyProvider } from '@turnkey/sdk-react-native';
+import { AuthRelayProvider } from './turnkey';
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { TURNKEY_API_URL } from '~/lib/constants';
@@ -25,9 +25,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView>
-        <SessionProvider config={sessionConfig}>
-          <TurnkeyProvider>{children}</TurnkeyProvider>
-        </SessionProvider>
+        <TurnkeyProvider config={sessionConfig}>
+          <AuthRelayProvider>{children}</AuthRelayProvider>
+        </TurnkeyProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

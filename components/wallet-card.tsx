@@ -10,7 +10,7 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
-import { Wallet } from "@turnkey/react-native-sessions/dist/types";
+import { Wallet } from "@turnkey/sdk-react-native";
 
 interface WalletCardProps {
   wallet: Wallet;

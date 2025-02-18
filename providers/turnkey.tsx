@@ -13,7 +13,7 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useSession } from "@turnkey/react-native-sessions";
+import { useTurnkey } from "@turnkey/sdk-react-native";
 import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
 import {
   PASSKEY_APP_NAME,
@@ -78,7 +78,7 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
   }
 }
 
-export interface TurnkeyClientType {
+export interface AuthRelayProviderType {
   state: AuthState;
   updateUser: ({
     email,
@@ -122,7 +122,7 @@ export interface TurnkeyClientType {
   clearError: () => void;
 }
 
-export const TurnkeyContext = createContext<TurnkeyClientType>({
+export const AuthRelayContext = createContext<AuthRelayProviderType>({
   state: initialState,
   updateUser: async () => Promise.resolve(),
   initEmailLogin: async () => Promise.resolve(),
@@ -139,24 +139,23 @@ export const TurnkeyContext = createContext<TurnkeyClientType>({
   clearError: () => {},
 });
 
-interface TurnkeyProviderProps {
+interface AuthRelayProviderProps {
   children: ReactNode;
 }
 
-export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
+export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const router = useRouter();
   const {
-    session,
     client,
     user,
     refreshUser,
     createEmbeddedKey,
     createSession,
     clearSession,
-  } = useSession();
+  } = useTurnkey();
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -436,7 +435,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.credentialBundle) {
-        await createSession(response.credentialBundle, 30);
+        await createSession(response.credentialBundle);
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -582,7 +581,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   };
 
   return (
-    <TurnkeyContext.Provider
+    <AuthRelayContext.Provider
       value={{
         state,
         updateUser,
@@ -601,6 +600,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       }}
     >
       {children}
-    </TurnkeyContext.Provider>
+    </AuthRelayContext.Provider>
   );
 };

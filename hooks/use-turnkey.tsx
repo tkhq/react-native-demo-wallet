@@ -1,10 +1,10 @@
 import { useContext } from 'react';
-import { TurnkeyContext } from 'providers/turnkey';
+import { AuthRelayContext } from 'providers/turnkey';
 
-export const useTurnkey = () => {
-  const context = useContext(TurnkeyContext);
+export const useAuthRelay = () => {
+  const context = useContext(AuthRelayContext);
   if (!context) {
-    throw new Error('useTurnkey must be used within a TurnkeyProvider');
+    throw new Error('useAuthRelay must be used within a AuthRelayProvider');
   }
   return context;
 };

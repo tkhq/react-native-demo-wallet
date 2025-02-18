@@ -1,16 +1,16 @@
 import { View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
-import { useTurnkey } from '~/hooks/use-turnkey';
+import { useAuthRelay } from '~/hooks/use-turnkey';
 import { useEffect, useState } from 'react';
 import { isValidEmail, isValidPhone } from '~/lib/utils';
 import EmailInput from '~/components/auth/auth.email';
 import PhoneNumberInput from '~/components/auth/auth.phone';
-import { useSession } from '@turnkey/react-native-sessions';
+import { useTurnkey } from '@turnkey/sdk-react-native';
 
 const Settings = () => {
-  const { user } = useSession();
-  const { updateUser } = useTurnkey();
+  const { user } = useTurnkey();
+  const { updateUser } = useAuthRelay();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 

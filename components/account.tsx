@@ -11,11 +11,11 @@ import { Text } from '~/components/ui/text';
 import { Avatar } from './ui/avatar';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'react-native-drawer-layout';
-import { useTurnkey } from '~/hooks/use-turnkey';
+import { useAuthRelay } from '~/hooks/use-turnkey';
 import DefaultProfile from '~/assets/svgs/default-profile.svg';
 
 export function Account() {
-  const { logout } = useTurnkey();
+  const { logout } = useAuthRelay();
   const router = useRouter();
   return (
     <DropdownMenu>
