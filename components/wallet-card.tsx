@@ -10,13 +10,10 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
+import { Wallet } from "@turnkey/react-native-sessions/dist/types";
 
 interface WalletCardProps {
-  wallet: {
-    id: string;
-    accounts: `0x${string}`[];
-    name?: string;
-  };
+  wallet: Wallet;
   exportWallet: (params: { walletId: string }) => Promise<string>;
 }
 
@@ -33,10 +30,12 @@ export const WalletCard = (props: WalletCardProps) => {
   useEffect(() => {
     (async () => {
       if (wallet.accounts.length > 0) {
-        const balance = await getBalance(wallet.accounts[0]);
+        const balance = await getBalance(
+          wallet.accounts[0].address as `0x${string}`
+        );
         const price = await getTokenPrice("ethereum");
         setSelectedAccount({
-          address: wallet.accounts[0],
+          address: wallet.accounts[0].address as `0x${string}`,
           balance,
           balanceUsd: Number(formatEther(balance)) * price,
         });
@@ -110,12 +109,12 @@ export const WalletCard = (props: WalletCardProps) => {
               Seed Phrase
             </Text>
             <BaseButton onPress={handleCopySeedPhrase}>
-            <View className="p-4 bg-gray-200 rounded-lg">
-              <Text className="text-center">{seedPhrase}</Text>
-              <View className="bg-transparent pt-2 rounded-lg flex flex-col items-end justify-right">
-                <Icons.copy className="stroke-muted-foreground" size={16} />
+              <View className="p-4 bg-gray-200 rounded-lg">
+                <Text className="text-center">{seedPhrase}</Text>
+                <View className="bg-transparent pt-2 rounded-lg flex flex-col items-end justify-right">
+                  <Icons.copy className="stroke-muted-foreground" size={16} />
+                </View>
               </View>
-            </View>
             </BaseButton>
             <Button
               onPress={() => setModalVisible(false)}

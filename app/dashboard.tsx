@@ -11,9 +11,11 @@ import { WalletCard } from "~/components/wallet-card";
 import { useTurnkey } from "~/hooks/use-turnkey";
 import { useRouter } from "expo-router";
 import { DEFAULT_ETHEREUM_ACCOUNTS } from "~/lib/constants";
+import { useSession } from "@turnkey/react-native-sessions";
 
 const Dashboard = () => {
-  const { user, createWallet, exportWallet } = useTurnkey();
+  const { user } = useSession();
+  const { createWallet, exportWallet } = useTurnkey();
   const router = useRouter();
   
   const [showMenu, setShowMenu] = useState(false);

@@ -14,9 +14,7 @@ import {
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
 import { useSession } from "@turnkey/react-native-sessions";
-import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import { Email, LoginMethod, User, WalletAccountParams } from "~/lib/types";
-import { getAddress } from "viem";
 import {
   PASSKEY_APP_NAME,
   TURNKEY_API_URL,
@@ -82,7 +80,6 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
 
 export interface TurnkeyClientType {
   state: AuthState;
-  user: User | undefined;
   updateUser: ({
     email,
     phone,
@@ -127,7 +124,6 @@ export interface TurnkeyClientType {
 
 export const TurnkeyContext = createContext<TurnkeyClientType>({
   state: initialState,
-  user: undefined,
   updateUser: async () => Promise.resolve(),
   initEmailLogin: async () => Promise.resolve(),
   completeEmailAuth: async () => Promise.resolve(),
@@ -151,73 +147,16 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const [user, setUser] = useState<User | undefined>(undefined);
-  const [client, setClient] = useState<TurnkeyClient | undefined>(undefined);
   const router = useRouter();
-  const { createEmbeddedKey, createSession, session, clearSession } =
-    useSession();
-
-  const fetchAndSetUserData = async () => {
-    if (session) {
-      const stamper = new ApiKeyStamper({
-        apiPrivateKey: session.privateKey,
-        apiPublicKey: session.publicKey,
-      });
-      const client = new TurnkeyClient({ baseUrl: TURNKEY_API_URL }, stamper);
-      setClient(client);
-
-      const whoami = await client.getWhoami({
-        organizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID ?? "",
-      });
-
-      if (whoami.userId && whoami.organizationId) {
-        const [walletsResponse, userResponse] = await Promise.all([
-          client.getWallets({
-            organizationId: whoami.organizationId,
-          }),
-          client.getUser({
-            organizationId: whoami.organizationId,
-            userId: whoami.userId,
-          }),
-        ]);
-
-        const wallets = await Promise.all(
-          walletsResponse.wallets.map(async (wallet) => {
-            const accounts = await client.getWalletAccounts({
-              organizationId: whoami.organizationId,
-              walletId: wallet.walletId,
-            });
-            return {
-              name: wallet.walletName,
-              id: wallet.walletId,
-              accounts: accounts.accounts.map((account) =>
-                getAddress(account.address)
-              ),
-            };
-          })
-        );
-
-        const user = userResponse.user;
-
-        setUser({
-          id: user.userId,
-          userName: user.userName,
-          email: user.userEmail,
-          phoneNumber: user.userPhoneNumber,
-          organizationId: whoami.organizationId,
-          wallets,
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchAndSetUserData();
-  }, [session]);
-
-  const onSessionUpdate = async () => {
-    await fetchAndSetUserData();
-  };
+  const {
+    session,
+    client,
+    user,
+    refreshUser,
+    createEmbeddedKey,
+    createSession,
+    clearSession,
+  } = useSession();
 
   const initEmailLogin = async (email: Email) => {
     dispatch({ type: "LOADING", payload: LoginMethod.Email });
@@ -302,7 +241,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
         if (response.credentialBundle) {
           await createSession(response.credentialBundle);
-          router.push("/dashboard");
         }
       } catch (error: any) {
         dispatch({ type: "ERROR", payload: error.message });
@@ -359,7 +297,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
         if (response.credentialBundle) {
           await createSession(response.credentialBundle);
-          router.push("/dashboard");
         }
       } catch (error: any) {
         dispatch({ type: "ERROR", payload: error.message });
@@ -428,7 +365,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
         if (credentialBundle) {
           await createSession(credentialBundle);
-          router.push("/dashboard");
         }
       }
     } catch (error: any) {
@@ -471,7 +407,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (credentialBundle) {
         await createSession(credentialBundle);
-        router.push("/dashboard");
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -502,7 +437,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
       if (response.credentialBundle) {
         await createSession(response.credentialBundle, 30);
-        router.push("/dashboard");
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -595,7 +529,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.activity.result.importWalletResult?.walletId != null) {
-        await onSessionUpdate();
+        await refreshUser();
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -630,7 +564,7 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
       });
 
       if (response.activity.result.createWalletResult?.walletId != null) {
-        await onSessionUpdate();
+        await refreshUser();
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -641,7 +575,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
 
   const logout = async () => {
     await clearSession();
-    router.replace("/");
   };
 
   const clearError = () => {
@@ -652,7 +585,6 @@ export const TurnkeyProvider: React.FC<TurnkeyProviderProps> = ({
     <TurnkeyContext.Provider
       value={{
         state,
-        user,
         updateUser,
         initEmailLogin,
         completeEmailAuth,

@@ -4,11 +4,13 @@ import { SessionProvider } from '@turnkey/react-native-sessions';
 import { TurnkeyProvider } from './turnkey';
 import React from 'react';
 import { useRouter } from 'expo-router';
+import { TURNKEY_API_URL } from '~/lib/constants';
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   const sessionConfig = {
+    apiBaseUrl: TURNKEY_API_URL,
     onSessionCreated: () => {
       router.replace("/dashboard");
     },

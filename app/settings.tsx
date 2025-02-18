@@ -6,9 +6,11 @@ import { useEffect, useState } from 'react';
 import { isValidEmail, isValidPhone } from '~/lib/utils';
 import EmailInput from '~/components/auth/auth.email';
 import PhoneNumberInput from '~/components/auth/auth.phone';
+import { useSession } from '@turnkey/react-native-sessions';
 
 const Settings = () => {
-  const { updateUser, user } = useTurnkey();
+  const { user } = useSession();
+  const { updateUser } = useTurnkey();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
