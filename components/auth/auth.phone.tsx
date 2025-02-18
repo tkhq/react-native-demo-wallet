@@ -1,140 +1,147 @@
-import React, { useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-import countries from "i18n-iso-countries";
-import { getCountries, getCountryCallingCode } from "libphonenumber-js";
-import emojiFlags from "emoji-flags";
-import enLocale from "i18n-iso-countries/langs/en.json";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, TextInput } from "react-native";
+import CountryPicker, {
+  getCallingCode,
+  CountryModalProvider,
+  Flag,
+  Country,
+  CountryCode,
+  CountryCodeList, 
+} from "react-native-country-picker-modal";
+import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
+import { getCountryCallingCodeAsync } from "react-native-country-picker-modal/lib/CountryService";
 
-countries.registerLocale(enLocale);
+const phoneUtil = PhoneNumberUtil.getInstance();
 
-const UNSUPPORTED_COUNTRY_CODES = new Set([
-  "+93", // Afghanistan
-  "+964", // Iraq
-  "+963", // Syria
-  "+249", // Sudan
-  "+98", // Iran
-  "+850", // North Korea
-  "+53", // Cuba
-  "+250", // Rwanda
-  "+379", // Vatican City
+// List of OFAC-sanctioned countries to exclude
+const OFAC_SANCTIONED_CODES = new Set([
+  "AF", // Afghanistan
+  "IQ", // Iraq
+  "SY", // Syria
+  "SD", // Sudan
+  "IR", // Iran
+  "KP", // North Korea
+  "CU", // Cuba
+  "RW", // Rwanda 
+  "VA", // Vatican
 ]);
 
-interface Country {
-  name: string;
-  code: string;
-  iso2: string;
-  flag: string;
+const allowedCountryCodes = CountryCodeList.filter(
+  (code) => !OFAC_SANCTIONED_CODES.has(code)
+);
+
+interface PhoneInputProps {
+  initialCountry?: CountryCode;
+  initialPhoneNumber?: string;
+  disabled?: boolean;
+  onChangeText?: (text: string) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-export interface PhoneNumberInputProps {
-  onPhoneChange: (phone: string) => void;
-  initialValue?: string;
-}
-
-export const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
-  onPhoneChange,
-  initialValue,
+export const PhoneInput: React.FC<PhoneInputProps> = ({
+  initialCountry,
+  initialPhoneNumber,
+  disabled = false,
+  onChangeText,
+  onValidationChange,
 }) => {
-  const countryList = useCountryList();
+  const [code, setCode] = useState<string>("1");
+  const [number, setNumber] = useState<string>(initialPhoneNumber || "");
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [countryCode, setCountryCode] = useState<CountryCode>(
+    initialCountry || "US"
+  );
 
-  // defualt to the United States
-  const defaultCountry =
-    countryList.find((c) => c.iso2 === "US") || countryList[0];
+  useEffect(() => {
+    const fetchCallingCode = async () => {
+      try {
+        const callingCode = await getCountryCallingCodeAsync(countryCode);
+        setCode(callingCode);
+      } catch (error) {
+        console.error("Error fetching calling code:", error);
+      }
+    };
+    fetchCallingCode();
+  }, [countryCode]);
 
-  const [phone, setPhone] = useState(initialValue ?? "");
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedCountry, setSelectedCountry] =
-    useState<Country>(defaultCountry);
-
-  const handlePhoneChange = (text: string) => {
-    const cleaned = text.replace(/\D/g, "");
-    setPhone(cleaned);
-    onPhoneChange(`${selectedCountry.code}${cleaned}`);
+  const handleSelect = (country: Country) => {
+    setCountryCode(country.cca2);
+    setCode(country.callingCode[0]);
   };
 
-  const selectCountry = (country: Country) => {
-    setSelectedCountry(country);
-    setDropdownVisible(false);
+  const handleTextChange = (text: string) => {
+    const cleaned = text.replace(/\D/g, "");
+    setNumber(cleaned);
+
+    onChangeText?.(`+${code}${cleaned}`);
+
+    const isValid = isValidNumber(cleaned, countryCode);
+    onValidationChange?.(isValid);
   };
 
   return (
-    <View className="relative w-full">
-      <View className="flex flex-row items-center border border-gray-300 rounded-md px-3 h-12">
-        <TouchableOpacity
-          className="flex flex-row items-center mr-2"
-          onPress={() => setDropdownVisible((prev) => !prev)}
-        >
-          <Text className="text-base font-normal">{selectedCountry.flag}</Text>
-          <View className="flex flex-row items-center ml-1">
-            <Text className="text-base font-normal">
-              {selectedCountry.code}
-            </Text>
-            <Text className="text-base font-normal ml-1">▾</Text>
-          </View>
-        </TouchableOpacity>
-        <TextInput
-          className="flex-1 text-base"
-          placeholder="Phone number"
-          keyboardType="phone-pad"
-          onChangeText={handlePhoneChange}
-          value={formatPhoneNumber(phone)}
-          maxLength={14}
-        />
-      </View>
-      {dropdownVisible && (
-        <View className="absolute top-16 left-0 right-0 bg-white border border-gray-300 rounded-md z-10 max-h-56">
-          <FlatList
-            data={countryList}
-            keyExtractor={(item) => item.iso2}
-            showsVerticalScrollIndicator
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                className="flex flex-row items-center justify-between py-2 px-3"
-                onPress={() => selectCountry(item)}
-              >
-                <View className="flex flex-row items-center">
-                  <Text className="text-xl font-normal mr-2">{item.flag}</Text>
-                  <Text className="text-base font-normal">{item.name}</Text>
-                </View>
-                <Text className="text-base font-normal">{item.code}</Text>
-              </TouchableOpacity>
-            )}
+    <View className="flex flex-row items-center border border-gray-300 rounded-md px-3 h-12">
+      <CountryModalProvider>
+        <View className="flex flex-row items-center justify-center">
+          <TouchableOpacity
+            className="flex flex-row justify-center items-center"
+            disabled={disabled}
+            onPress={() => setModalVisible(true)}
+          >
+            <CountryPicker
+              onSelect={handleSelect}
+              withEmoji
+              withFilter
+              withFlag
+              countryCode={countryCode}
+              withCallingCode
+              countryCodes={allowedCountryCodes}
+              disableNativeModal={disabled}
+              visible={modalVisible}
+              renderFlagButton={() => (
+                <Flag countryCode={countryCode} flagSize={24} />
+              )}
+              onClose={() => setModalVisible(false)}
+            />
+            <Text className="text-black text-base font-medium">{`+${code}`}</Text>
+            <Text className="text-black text-base font-normal ml-0.5">▾</Text>
+          </TouchableOpacity>
+          <TextInput
+            className="flex-1 text-base mb-1 ml-6"
+            placeholder="Phone Number"
+            onChangeText={handleTextChange}
+            value={formatPhoneNumber(number, countryCode)}
+            editable={!disabled}
+            selectionColor="black"
+            keyboardAppearance="dark"
+            keyboardType="number-pad"
+            autoFocus
           />
         </View>
-      )}
+      </CountryModalProvider>
     </View>
   );
 };
 
-const useCountryList = () =>
-  useMemo(
-    () =>
-      getCountries()
-        .filter((iso2) => countries.getName(iso2, "en"))
-        .map((iso2) => {
-          const name = countries.getName(iso2, "en")!;
-          const code = `+${getCountryCallingCode(iso2)}`;
-          const flag = emojiFlags[iso2]?.emoji || "🏳️";
+const isValidNumber = (number: string, countryCode?: string): boolean => {
+  try {
+    if (!countryCode) return false;
 
-          return { name, code, iso2, flag };
-        })
-        .filter((country) => !UNSUPPORTED_COUNTRY_CODES.has(country.code)),
-    []
-  );
+    const parsedNumber = phoneUtil.parse(number, countryCode);
+    return phoneUtil.isValidNumber(parsedNumber);
+  } catch {
+    return false;
+  }
+};
 
-const formatPhoneNumber = (phoneNumber: string) => {
-  if (phoneNumber.length === 0) return "";
-  if (phoneNumber.length <= 3) return `(${phoneNumber}`;
-  if (phoneNumber.length <= 6)
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-  return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
-    3,
-    6
-  )}-${phoneNumber.slice(6, 10)}`;
+const formatPhoneNumber = (phoneNumber: string, iso2: string) => {
+  if (!phoneNumber) return "";
+  try {
+    const parsedNumber = phoneUtil.parse(phoneNumber, iso2);
+    const formatted = phoneUtil.format(parsedNumber, PhoneNumberFormat.INTERNATIONAL);
+    const countryCode = `+${parsedNumber.getCountryCode()}`;
+    return formatted.replace(countryCode, "").trim();
+  } catch {
+    return phoneNumber;
+  }
 };
