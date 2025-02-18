@@ -13,8 +13,6 @@ import {
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
-import { useSession } from "~/hooks/use-session";
-import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import {
   Email,
   HashFunction,
@@ -36,6 +34,7 @@ import {
   encryptWalletToBundle,
   generateP256KeyPair,
 } from "@turnkey/crypto";
+import { useTurnkey } from "@turnkey/sdk-react-native";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -229,7 +228,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
         parameters,
       });
 
-      await onSessionUpdate();
+      await refreshUser();
     } catch (error) {
       console.error("Failed to update user:", error);
     }
