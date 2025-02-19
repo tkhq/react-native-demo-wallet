@@ -1,7 +1,7 @@
 import * as React from "react";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { useAuthRelay } from "~/hooks/use-turnkey";
+import { useAuthRelay } from "~/hooks/use-auth-relayer";
 import { isSupported } from "@turnkey/react-native-passkey-stamper";
 import { Email, LoginMethod } from "~/lib/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

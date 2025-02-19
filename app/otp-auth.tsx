@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
-import { useAuthRelay } from '~/hooks/use-turnkey';
+import { useAuthRelay } from '~/hooks/use-auth-relayer';
 import { Turnkey } from '~/lib/icons/Turnkey';
 import { router } from 'expo-router';
 import { LoginMethod } from '~/lib/types';

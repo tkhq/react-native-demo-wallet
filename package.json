@@ -29,7 +29,7 @@
     "@turnkey/crypto": "^2.3.1",
     "@turnkey/http": "^2.16.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.0",
-    "@turnkey/sdk-react-native": "https://pkg.csb.dev/tkhq/sdk/commit/cf05a532/@turnkey/sdk-react-native",
+    "@turnkey/sdk-react-native": "^0.1.0",
     "@turnkey/sdk-server": "^1.6.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",

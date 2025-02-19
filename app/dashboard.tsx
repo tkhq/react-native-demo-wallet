@@ -8,14 +8,13 @@ import {
   Modal,
 } from "react-native";
 import { WalletCard } from "~/components/wallet-card";
-import { useAuthRelay } from "~/hooks/use-turnkey";
 import { useRouter } from "expo-router";
 import { DEFAULT_ETHEREUM_ACCOUNTS } from "~/lib/constants";
 import { useTurnkey } from "@turnkey/sdk-react-native";
 
 const Dashboard = () => {
-  const { user } = useTurnkey();
-  const { createWallet, exportWallet, signRawPayload } = useAuthRelay();
+  const { user, createWallet } = useTurnkey();
+  const { exportWallet, signRawPayload } = useTurnkey();
   const router = useRouter();
   
   const [showMenu, setShowMenu] = useState(false);

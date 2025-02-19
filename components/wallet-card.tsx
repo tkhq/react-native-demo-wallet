@@ -60,9 +60,15 @@ export const WalletCard = (props: WalletCardProps) => {
   }, [wallet]);
 
   const handleExportWallet = async () => {
+    try {
     const seed = await exportWallet({ walletId: wallet.id });
     setSeedPhrase(seed);
     setModalType("export");
+    }
+    catch (error) {
+      alert("Failed to export wallet.");
+      console.error("Failed to export wallet:", error);
+    }
   };
 
   const handleSignWithWallet = async () => {
@@ -83,6 +89,7 @@ export const WalletCard = (props: WalletCardProps) => {
 
       setSignedMessage(response);
     } catch (error) {
+      alert("Error signing message.");
       console.error("Error signing message:", error);
     }
   };

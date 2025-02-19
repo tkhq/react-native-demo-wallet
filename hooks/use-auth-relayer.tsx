@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthRelayContext } from 'providers/turnkey';
+import { AuthRelayContext } from '~/providers/auth-provider';
 
 export const useAuthRelay = () => {
   const context = useContext(AuthRelayContext);
