@@ -2,8 +2,8 @@ import { DEFAULT_ETHEREUM_ACCOUNTS } from "~/lib/constants";
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTurnkey } from "~/hooks/use-turnkey";
 import { useRouter } from "expo-router";
+import { useTurnkey } from "@turnkey/sdk-react-native";
 
 const ImportWalletScreen = ({ navigation }: { navigation: any }) => {
   const router = useRouter();
@@ -27,6 +27,7 @@ const ImportWalletScreen = ({ navigation }: { navigation: any }) => {
       });
       router.back();
     } catch (error) {
+      alert("Failed to import wallet.");
       console.error(error);
     }
   };

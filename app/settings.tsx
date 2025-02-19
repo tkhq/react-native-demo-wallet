@@ -1,11 +1,11 @@
 import { Keyboard, View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { useTurnkey } from "~/hooks/use-turnkey";
 import { useState } from "react";
 import { parsePhoneNumber } from "~/lib/utils";
 import { EmailInput } from "~/components/auth/auth.email";
 import { LoaderButton } from "~/components/ui/loader-button";
 import { PhoneInput } from "~/components/auth/auth.phone";
+import { useTurnkey } from '@turnkey/sdk-react-native';
 
 const Settings = () => {
   const { user, updateUser } = useTurnkey();
@@ -23,8 +23,15 @@ const Settings = () => {
   const { country, nationalNumber } = parsePhoneNumber(phone);
 
   const handleUpdateUser = async () => {
-    await updateUser({ email, phone });
-    Keyboard.dismiss();
+    try {
+      await updateUser({ email, phone });
+      Keyboard.dismiss();
+    }
+    catch (err){
+      alert("Failed to update user.");
+      console.error(err);
+    }
+   
   };
 
   const isDisabled =

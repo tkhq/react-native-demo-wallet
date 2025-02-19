@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
-import { useTurnkey } from '~/hooks/use-turnkey';
+import { useAuthRelay } from '~/hooks/use-auth-relayer';
 import { Turnkey } from '~/lib/icons/Turnkey';
 import { router } from 'expo-router';
 import { LoginMethod } from '~/lib/types';
@@ -19,7 +19,7 @@ import { useSearchParams } from 'expo-router/build/hooks';
 
 const OTPAuth = () => {
   const [otpCode, setOtpCode] = useState('');
-  const { state, completeEmailAuth, clearError } = useTurnkey();
+  const { state, completeEmailAuth, clearError } = useAuthRelay();
   const otpInputRef = useRef<OtpInputRef>(null);
 
   const searchParams = useSearchParams();

@@ -27,7 +27,6 @@ import {
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { Providers } from "~/providers";
 import { Toaster } from "sonner-native";
-import { Text } from "~/components/ui/text";
 
 import { Header } from "~/components/header";
 

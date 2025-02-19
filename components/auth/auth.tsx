@@ -1,7 +1,7 @@
 import * as React from "react";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
-import { useTurnkey } from "~/hooks/use-turnkey";
+import { useAuthRelay } from "~/hooks/use-auth-relayer";
 import { isSupported } from "@turnkey/react-native-passkey-stamper";
 import { Email, LoginMethod } from "~/lib/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,14 +16,8 @@ import { PhoneInput } from "./auth.phone";
 
 export const Auth = () => {
   const insets = useSafeAreaInsets();
-  const {
-    state,
-    initEmailLogin,
-    initPhoneLogin,
-    signUpWithPasskey,
-    loginWithPasskey,
-    loginWithOAuth,
-  } = useTurnkey();
+  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useAuthRelay();
+
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");

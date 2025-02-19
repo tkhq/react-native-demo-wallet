@@ -1,17 +1,34 @@
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-import { SessionProvider } from './session';
-import { TurnkeyProvider } from './turnkey';
+import { TurnkeyProvider } from '@turnkey/sdk-react-native';
+import { AuthRelayProvider } from './auth-provider';
 import React from 'react';
+import { useRouter } from 'expo-router';
+import { TURNKEY_API_URL, TURNKEY_PARENT_ORG_ID } from '~/lib/constants';
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+
+  const sessionConfig = {
+    apiBaseUrl: TURNKEY_API_URL,
+    organizationId: TURNKEY_PARENT_ORG_ID,
+    onSessionCreated: () => {
+      router.replace("/dashboard");
+    },
+    onSessionExpired: () => {
+      router.push("/");
+    },
+    onSessionCleared: () => {
+      router.push("/");
+    },
+  };
+
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView>
-        <SessionProvider>
-          <TurnkeyProvider>{children}</TurnkeyProvider>
-        </SessionProvider>
+        <TurnkeyProvider config={sessionConfig}>
+          <AuthRelayProvider>{children}</AuthRelayProvider>
+        </TurnkeyProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

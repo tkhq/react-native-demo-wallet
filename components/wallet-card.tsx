@@ -10,6 +10,7 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
+import { Wallet } from "@turnkey/sdk-react-native";
 import {
   HashFunction,
   PayloadEncoding,
@@ -18,11 +19,7 @@ import {
 import { SignWithWalletButton } from "./sign";
 
 interface WalletCardProps {
-  wallet: {
-    id: string;
-    accounts: `0x${string}`[];
-    name?: string;
-  };
+  wallet: Wallet;
   exportWallet: (params: { walletId: string }) => Promise<string>;
   signRawPayload: (params: {
     signWith: string;
@@ -49,10 +46,12 @@ export const WalletCard = (props: WalletCardProps) => {
   useEffect(() => {
     (async () => {
       if (wallet.accounts.length > 0) {
-        const balance = await getBalance(wallet.accounts[0]);
+        const balance = await getBalance(
+          wallet.accounts[0].address as `0x${string}`
+        );
         const price = await getTokenPrice("ethereum");
         setSelectedAccount({
-          address: wallet.accounts[0],
+          address: wallet.accounts[0].address as `0x${string}`,
           balance,
           balanceUsd: parseFloat(formatEther(balance)) * price,
         });
@@ -61,9 +60,15 @@ export const WalletCard = (props: WalletCardProps) => {
   }, [wallet]);
 
   const handleExportWallet = async () => {
+    try {
     const seed = await exportWallet({ walletId: wallet.id });
     setSeedPhrase(seed);
     setModalType("export");
+    }
+    catch (error) {
+      alert("Failed to export wallet.");
+      console.error("Failed to export wallet:", error);
+    }
   };
 
   const handleSignWithWallet = async () => {
@@ -84,6 +89,7 @@ export const WalletCard = (props: WalletCardProps) => {
 
       setSignedMessage(response);
     } catch (error) {
+      alert("Error signing message.");
       console.error("Error signing message:", error);
     }
   };
@@ -128,7 +134,6 @@ export const WalletCard = (props: WalletCardProps) => {
           </View>
         </CardContent>
       </Card>
-
       {/* Modals */}
       <ExportSeedPhraseModal
         visible={modalType === "export"}
