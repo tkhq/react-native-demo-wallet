@@ -1,11 +1,5 @@
-import * as React from 'react';
-import { Auth } from '~/components/auth/auth';
+import { Auth } from "~/components/auth/auth";
 
-
-function Landing() {
-  return (
-          <Auth />
-  );
+export default function Login() {
+  return <Auth />;
 }
-
-export default Landing;

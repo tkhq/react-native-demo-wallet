@@ -1,47 +1,17 @@
 # React Native Demo Wallet
 
-This project is a React Native application designed to demonstrate wallet functionality. It uses Vercel Serverless Functions to handle API requests and is configured to run on iOS, Android, and web platforms.
+This project is a React Native application designed to demonstrate wallet functionality. It is built on top of the [Expo Turnkey Template](https://github.com/tkhq/expo-template) and has been modified to serve as a full-fledged example application.
 
 ## **Demo**
 
 https://github.com/user-attachments/assets/e4cff012-11e9-4636-b67a-5dbf75355832
 
----
-
-## **Table of Contents**
-
-- [Setup Instructions](#setup-instructions)
-- [Scripts Explanation](#scripts-explanation)
-- [Configuration Files](#configuration-files)
-  - [app.json](#appjson)
-  - [eas.json](#easjson)
-  - [assetlinks.json](#assetlinksjson)
-  - [apple-app-site-association](#apple-app-site-association)
-  - [Environment Variables](#environment-variables)
-- [Passkey & OAuth Configuration](#passkey--oauth-configuration)
-  - [Passkeys](#passkeys)
-  - [Sign in with Google](#sign-in-with-google)
-  - [Sign in with Apple](#sign-in-with-apple)
-
----
-
 ## **Setup Instructions**
-
-### **Prerequisites**
-
-Ensure you have the following installed:
-
-| Requirement           | Version                                                             |
-| --------------------- | ------------------------------------------------------------------- |
-| Node.js               | >= 20                                                               |
-| Xcode (for iOS)       | >= 12                                                               |
-| Android Studio        | >= 4.0                                                              |
-| (Optional) Vercel CLI | Used for hosting `apple-app-site-association` and `assetlinks.json` |
 
 ### **Clone the Repository**
 
 ```sh
-git clone git@github.com:tkhq/react-native-demo-wallet.git
+git clone https://github.com/tkhq/expo-template.git
 cd react-native-demo-wallet
 ```
 
@@ -51,111 +21,22 @@ cd react-native-demo-wallet
 npm install
 ```
 
-### **Run the Application**
-
-To start the application, use one of the following:
-
-- **iOS:**
-  ```sh
-  npm run dev
-  ```
-- **Android:**
-  ```sh
-  npm run dev:android
-  ```
-- **Web:**
-  ```sh
-  npm run dev:web
-  ```
-
-### **Deploy to Vercel**
-
-Install the Vercel CLI:
-
-```sh
-npm i -g vercel
-```
-
-Run the app locally:
-
-```sh
-vercel dev
-```
-
-Deploy the app:
-
-```sh
-vercel deploy
-```
-
----
-
-## **Scripts Explanation**
-
-| Script        | Description                                         |
-| ------------- | --------------------------------------------------- |
-| `dev`         | Starts the Expo server for iOS.                     |
-| `dev:web`     | Starts the Expo server for web.                     |
-| `dev:android` | Starts the Expo server for Android.                 |
-| `api`         | Runs the Vercel development server.                 |
-| `clean`       | Removes the `.expo` and `node_modules` directories. |
-| `postinstall` | Compiles Tailwind CSS for `nativewind`.             |
-
----
-
 ## **Configuration Files**
-
-### **app.json**
-
-This file contains the Expo app configuration:
-
-- `name`: App name
-- `slug`: URL-friendly app name
-- `version`: App version
-- `orientation`: Screen orientation
-- `icon`: Path to app icon
-- `scheme`: Custom URL scheme for deep linking
-- `plugins`: List of Expo plugins
-
-### **eas.json**
-
-Configures Expo Application Services (EAS) for app builds & submissions:
-
-- `cli`: Specifies CLI version
-- `build`: Contains build profiles (development, preview, production)
-- `submit`: App submission settings
-
-### **assetlinks.json**
-
-Used for Android app linking:
-
-- `relation`: Defines permissions for handling URLs & login credentials
-- `target`: Specifies the Android app package name & SHA-256 fingerprint
-
-### **apple-app-site-association**
-
-Used for iOS app linking:
-
-- `webcredentials`: Lists apps that can access web credentials
 
 ### **Environment Variables**
 
-Create a `.env` file in the root directory of your project. You can use the provided `.env.example` file as a template:
+Both the frontend and backend require environment variables to function properly. Example environment variable files are included in the repository:
 
-```env
-# ------------------------------
-# SERVER-SIDE CONFIGURATION
-# ------------------------------
+- **Frontend**: `.env.example` in the root directory
+- **Backend**: `.env.example` in the `example-server` directory
 
-TURNKEY_API_PUBLIC_KEY="<your_turnkey_api_public_key>"
-TURNKEY_API_PRIVATE_KEY="<your_turnkey_api_private_key>"
+You should copy these files and rename them to `.env`, then update the values as needed.
 
-# ------------------------------
-# CLIENT-SIDE CONFIGURATION
-# ------------------------------
+#### **Frontend (`.env` in `react-native-demo-wallet`)**
 
+```ini
 ## General App Info
-EXPO_PASSKEY_APP_NAME="<your_app_name>"
+EXPO_PUBLIC_PASSKEY_APP_NAME="<your_app_name>"
 EXPO_PUBLIC_RPID="<your_rpid_domain>"
 EXPO_PUBLIC_BACKEND_API_URL="<your_backend_api_url>"
 
@@ -168,46 +49,81 @@ EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="<your_google_ios_client_id>"
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID="<your_google_android_client_id>"
 ```
 
----
+#### **Backend (`.env` in `example-server`)**
 
-## **Passkey & OAuth Configuration**
+```ini
+PORT="3000"
 
-### **Passkeys**
+TURNKEY_API_URL="https://api.turnkey.com"
+TURNKEY_ORGANIZATION_ID="<your_turnkey_organization_id>"
 
-To allow passkeys to be registered on iOS and Android, you must set up an **associated domain**.
+TURNKEY_API_PUBLIC_KEY="<your_turnkey_api_public_key>"
+TURNKEY_API_PRIVATE_KEY="<your_turnkey_api_private_key>"
+```
 
-1. **Host the `.well-known` file**
+### **Start the Development Server**
 
-   - Create an `apple-app-site-association` file (iOS) and `assetlinks.json` file (Android).
-   - Upload them to your server at:
-     ```
-     https://your-domain.com/.well-known/apple-app-site-association
-     https://your-domain.com/.well-known/assetlinks.json
-     ```
+#### **iOS (default platform)**
 
-2. **Update `app.json` for Expo**
+```sh
+npm run dev
+```
 
-Modify the `app.json` file to include the passkey domain:
+#### **Start the Example Backend Server**
+
+```sh
+cd example-server
+npm install
+npm run start
+```
+
+## **Passkey Setup**
+
+To enable passkeys, you must configure your app’s `app.json` file and set up an associated domain. For details on setting up Apple's **Associated Domains**, refer to [Apple's Documentation](https://developer.apple.com/documentation/xcode/supporting-associated-domains). For Android, you must configure **Digital Asset Links** by setting up an `assetlinks.json` file. Refer to [Google's Documentation](https://developer.android.com/training/app-links/verify-android-applinks).
+
+### **1. Update `app.json` with associated domains:**
 
 ```json
 {
-  "expo": {
-    "scheme": "myapp",
-    "ios": {
-      "associatedDomains": [
-        "webcredentials:your-domain.com",
-        "applinks:your-domain.com"
-      ]
-    },
-    "android": {
-      "intentFilters": [
+  "ios": {
+    "supportsTablet": true,
+    "bundleIdentifier": "<your_bundle_identifier>",
+    "associatedDomains": ["webcredentials:<your_domain>"]
+  },
+  "android": {
+    "intentFilters": [
+      {
+        "action": "VIEW",
+        "category": ["BROWSABLE", "DEFAULT"],
+        "data": {
+          "scheme": "https",
+          "host": "<your_domain>"
+        }
+      }
+    ]
+  }
+}
+```
+
+### **2. Ensure `EXPO_PUBLIC_RPID` is set correctly in your `.env` file:**
+
+```ini
+EXPO_PUBLIC_RPID="<your_rpid_domain>"
+```
+
+## **OAuth Setup**
+
+If using OAuth, you need to configure the app's `app.json` for URL schemes.
+
+### **1. Update `app.json` to include your Google OAuth redirect scheme:**
+
+```json
+{
+  "ios": {
+    "infoPlist": {
+      "CFBundleURLTypes": [
         {
-          "action": "VIEW",
-          "category": ["BROWSABLE", "DEFAULT"],
-          "data": {
-            "scheme": "https",
-            "host": "your-domain.com"
-          }
+          "CFBundleURLSchemes": ["<your_google_redirect_scheme>"]
         }
       ]
     }
@@ -215,34 +131,9 @@ Modify the `app.json` file to include the passkey domain:
 }
 ```
 
-3. **Set `EXPO_PUBLIC_RPID` in `.env`**
-   ```
-   EXPO_PUBLIC_RPID="<your_rpid_domain>"
-   ```
+### **2. Ensure OAuth credentials are set in `.env`**
 
----
-
-### **Sign in with Google**
-
-1. **Add Google credentials to `.env`**
-
-   ```
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_REDIRECT_SCHEME="your-google-redirect-scheme"
-   ```
-
-2. **Modify `app.json`**
-
-```json
-{
-  "expo": {
-    "scheme": "your-google-redirect-scheme"
-  }
-}
+```ini
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="<your_google_ios_client_id>"
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID="<your_google_android_client_id>"
 ```
-
----
-
-### **Sign in with Apple**
-
-To enable this feature, simply add the **Sign in with Apple** capability to your app in Xcode.

@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import CountryPicker, {
-  getCallingCode,
   CountryModalProvider,
   Flag,
   Country,
   CountryCode,
-  CountryCodeList, 
+  CountryCodeList,
 } from "react-native-country-picker-modal";
 import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
 import { getCountryCallingCodeAsync } from "react-native-country-picker-modal/lib/CountryService";
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
-// List of OFAC-sanctioned countries to exclude
-const OFAC_SANCTIONED_CODES = new Set([
+// List of unsupported country dial codes
+const UNSUPPORTED_COUNTRY_CODES = new Set([
   "AF", // Afghanistan
   "IQ", // Iraq
   "SY", // Syria
@@ -22,12 +21,12 @@ const OFAC_SANCTIONED_CODES = new Set([
   "IR", // Iran
   "KP", // North Korea
   "CU", // Cuba
-  "RW", // Rwanda 
-  "VA", // Vatican
+  "RW", // Rwanda
+  "VA", // Vatican City
 ]);
 
 const allowedCountryCodes = CountryCodeList.filter(
-  (code) => !OFAC_SANCTIONED_CODES.has(code)
+  (code) => !UNSUPPORTED_COUNTRY_CODES.has(code),
 );
 
 interface PhoneInputProps {
@@ -49,7 +48,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const [number, setNumber] = useState<string>(initialPhoneNumber || "");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [countryCode, setCountryCode] = useState<CountryCode>(
-    initialCountry || "US"
+    initialCountry || "US",
   );
 
   useEffect(() => {
@@ -138,7 +137,10 @@ const formatPhoneNumber = (phoneNumber: string, iso2: string) => {
   if (!phoneNumber) return "";
   try {
     const parsedNumber = phoneUtil.parse(phoneNumber, iso2);
-    const formatted = phoneUtil.format(parsedNumber, PhoneNumberFormat.INTERNATIONAL);
+    const formatted = phoneUtil.format(
+      parsedNumber,
+      PhoneNumberFormat.INTERNATIONAL,
+    );
     const countryCode = `+${parsedNumber.getCountryCode()}`;
     return formatted.replace(countryCode, "").trim();
   } catch {

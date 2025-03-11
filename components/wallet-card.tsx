@@ -4,8 +4,7 @@ import { formatEther, keccak256, toBytes } from "viem";
 import { Skeleton } from "./ui/skeleton";
 import { truncateAddress } from "~/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Icons } from "./icons";
-import { H3, Muted } from "./ui/typography";
+import { Icons } from "./ui/icon";
 import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
@@ -116,18 +115,20 @@ export const WalletCard = (props: WalletCardProps) => {
           ) : (
             <Skeleton className="h-12 w-12" />
           )}
-          <H3 className="text-4xl font-bold">
-            ${selectedAccount?.balanceUsd.toFixed(2)}{" "}
-            <Muted className="ml-1">USD</Muted>
-          </H3>
-          <Muted>
+          <View className="web:scroll-m-20 text-2xl text-foreground font-semibold tracking-tight web:select-text">
+            <Text className="text-4xl font-bold">
+              ${selectedAccount?.balanceUsd.toFixed(2)}{" "}
+              <Text className="text-sm text-muted-foreground ml-1">USD</Text>
+            </Text>
+          </View>
+          <Text className="text-sm text-muted-foreground">
             {selectedAccount?.balance
               ? parseFloat(
                   Number(formatEther(selectedAccount?.balance)).toFixed(6)
                 ).toString()
               : "0"}{" "}
             ETH
-          </Muted>
+          </Text>
           <View className="flex flex-row items-center gap-4">
             <ExportWalletButton onExportWallet={handleExportWallet} />
             <SignWithWalletButton onSignWithWallet={handleSignWithWallet} />
