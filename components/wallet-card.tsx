@@ -9,35 +9,28 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
-import { Wallet } from "@turnkey/sdk-react-native";
-import {
-  HashFunction,
-  PayloadEncoding,
-  SignRawPayloadResult,
-} from "~/lib/types";
+import { useTurnkey, Wallet } from "@turnkey/sdk-react-native";
+import { SignRawPayloadResult } from "~/lib/types";
 import { SignWithWalletButton } from "./sign";
+import { createAccount } from "@turnkey/viem";
+import { createWalletClient, http } from "viem";
+import { sepolia } from "viem/chains";
 
 interface WalletCardProps {
   wallet: Wallet;
   exportWallet: (params: { walletId: string }) => Promise<string>;
-  signRawPayload: (params: {
-    signWith: string;
-    payload: string;
-    encoding: PayloadEncoding;
-    hashFunction: HashFunction;
-  }) => Promise<SignRawPayloadResult>;
 }
 
 export const WalletCard = (props: WalletCardProps) => {
-  const { wallet, exportWallet, signRawPayload } = props;
+  const { wallet, exportWallet } = props;
+  const { user, client } = useTurnkey();
   const [selectedAccount, setSelectedAccount] = useState<{
     address: `0x${string}`;
     balance: bigint;
     balanceUsd: number;
   } | null>(null);
   const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
-  const [signedMessage, setSignedMessage] =
-    useState<SignRawPayloadResult | null>(null);
+  const [signedMessage, setSignedMessage] = useState<string | null>(null);
   const [modalType, setModalType] = useState<"export" | "sign" | null>(null);
 
   const unsignedMessage = "I love Turnkey!";
@@ -60,11 +53,10 @@ export const WalletCard = (props: WalletCardProps) => {
 
   const handleExportWallet = async () => {
     try {
-    const seed = await exportWallet({ walletId: wallet.id });
-    setSeedPhrase(seed);
-    setModalType("export");
-    }
-    catch (error) {
+      const seed = await exportWallet({ walletId: wallet.id });
+      setSeedPhrase(seed);
+      setModalType("export");
+    } catch (error) {
       alert("Failed to export wallet.");
       console.error("Failed to export wallet:", error);
     }
@@ -77,16 +69,24 @@ export const WalletCard = (props: WalletCardProps) => {
 
   const confirmSignMessage = async () => {
     try {
-      const hashedMessage = keccak256(toBytes(unsignedMessage));
-
-      const response = await signRawPayload({
+      const viemAccount = await createAccount({
+        client: client!,
+        organizationId: user?.organizationId!,
         signWith: selectedAccount?.address as string,
-        payload: hashedMessage,
-        encoding: PayloadEncoding.Hexadecimal,
-        hashFunction: HashFunction.NoOp,
+        ethereumAddress: selectedAccount?.address as string,
       });
 
-      setSignedMessage(response);
+      const viemClient = createWalletClient({
+        account: viemAccount,
+        chain: sepolia,
+        transport: http(),
+      });
+
+      const signedMessage = await viemClient.signMessage({
+        message: unsignedMessage,
+      });
+
+      setSignedMessage(signedMessage);
     } catch (error) {
       alert("Error signing message.");
       console.error("Error signing message:", error);
@@ -195,7 +195,7 @@ const ExportSeedPhraseModal = ({
 interface SignMessageModalProps {
   visible: boolean;
   unSignedMessage: string;
-  signedMessage: SignRawPayloadResult | null;
+  signedMessage: string | null;
   onClose: () => void;
   onSign: () => void;
 }
@@ -227,14 +227,9 @@ const SignMessageModal = ({
             <View>
               <View className="mt-4 p-4 bg-gray-100 rounded-lg gap-4">
                 <Text className="font-semibold">Signed Result:</Text>
-                {(["r", "s", "v"] as const).map((key) => (
-                  <View key={key} className="flex flex-row items-center gap-2 pr-2">
-                    <Text className="text-black font-bold text-lg">{key}:</Text>
-                    <Text className="text-black text-base font-normal">
-                      {signedMessage[key]}
-                    </Text>
-                  </View>
-                ))}
+                <Text className="text-black text-base font-normal">
+                  {signedMessage}
+                </Text>
               </View>
               <Button
                 onPress={onClose}

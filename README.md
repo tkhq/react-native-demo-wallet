@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/e4cff012-11e9-4636-b67a-5dbf75355832
 ### **Clone the Repository**
 
 ```sh
-git clone https://github.com/tkhq/expo-template.git
+git clone https://github.com/tkhq/react-native-demo-wallet.git
 cd react-native-demo-wallet
 ```
 
@@ -47,6 +47,7 @@ EXPO_PUBLIC_TURNKEY_API_URL="https://api.turnkey.com"
 ## Google OAuth Credentials
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="<your_google_ios_client_id>"
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID="<your_google_android_client_id>"
+EXPO_PUBLIC_GOOGLE_REDIRECT_URI="<your_google_redirect_uri>"
 ```
 
 #### **Backend (`.env` in `example-server`)**

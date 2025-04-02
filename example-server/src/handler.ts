@@ -61,7 +61,6 @@ export async function initOtpAuth(
       body: createSubOrgParams,
     } as Request);
     organizationId = subOrgResponse.subOrganizationId;
-    console.log("subOrgResponse", subOrgResponse);
   }
 
   const result = await turnkey.initOtpAuth({

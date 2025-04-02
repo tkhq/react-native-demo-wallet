@@ -10,6 +10,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const withTimeout = <T>(promise: Promise<T>, timeoutMs = 5000, fallback: T): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) =>
+      setTimeout(() => resolve(fallback), timeoutMs)
+    ),
+  ]);
+};
+
+
 // parses a full phone number into its country code and national number
 export const parsePhoneNumber = (fullNumber: string): ParsedPhoneNumber => {
   try {

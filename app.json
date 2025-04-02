@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.moe_odeh.expotemplate"
+      "package": "xyz.tkhqlabs.passkeyapp"
     },
     "web": {
       "bundler": "metro",

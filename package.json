@@ -21,8 +21,10 @@
     "@rn-primitives/separator": "^1.1.0",
     "@rn-primitives/slot": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
+    "@turnkey/http": "^2.22.0",
     "@turnkey/react-native-passkey-stamper": "^1.0.6",
-    "@turnkey/sdk-react-native": "^1.0.0",
+    "@turnkey/sdk-react-native": "^1.0.3",
+    "@turnkey/viem": "^0.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "~52.0.37",
@@ -59,7 +61,7 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "tailwind-merge": "^3.0.2",
-    "viem": "^2.23.7"
+    "viem": "^2.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
