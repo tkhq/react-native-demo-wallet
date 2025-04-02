@@ -7,6 +7,8 @@ import { Platform, View } from "react-native";
 import {
   GOOGLE_ANDROID_CLIENT_ID,
   GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_REDIRCT_URI,
+  OAUTH_TOKEN_EXPIRATION_SECONDS,
 } from "~/lib/constants";
 import * as Crypto from "expo-crypto";
 import GoogleIcon from "../../assets/svgs/google.svg";
@@ -40,8 +42,7 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
       android: GOOGLE_ANDROID_CLIENT_ID,
     }),
     redirectUri: makeRedirectUri({
-      native:
-        "com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm:/oauthredirect",
+      native: GOOGLE_REDIRCT_URI,
     }),
     scopes: ["openid", "profile", "email"],
     extraParams: nonce ? { nonce } : {},
@@ -56,7 +57,7 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
           oidcToken: id_token,
           providerName: "google",
           targetPublicKey,
-          expirationSeconds: "3600",
+          expirationSeconds: OAUTH_TOKEN_EXPIRATION_SECONDS,
         });
 
         // we refresh the nonce before authentication to ensure a new one is used
@@ -107,7 +108,7 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
           oidcToken: credential.identityToken,
           providerName: "apple",
           targetPublicKey,
-          expirationSeconds: "3600",
+          expirationSeconds: OAUTH_TOKEN_EXPIRATION_SECONDS,
         });
 
         // we refresh the nonce before authentication to ensure a new one is used
@@ -132,6 +133,19 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
   );
 };
 
+/**
+ * The nonce is a unique, cryptographically secure string used to ensure the authenticity and integrity
+ * of each authentication request. In our implementation, we generate the nonce by hashing the embedded public key.
+ *
+ * Key purposes:
+ * 1. Prevent Replay Attacks: By using a unique nonce per session, we help ensure that an intercepted token
+ *    cannot be reused maliciously.
+ * 2. Tie the Authentication Request to the Response: The nonce is included in the OAuth flow so that the identity token
+ *    received from providers (Google or Apple) is bound to the specific authentication request.
+ *
+ * After a successful authentication, the nonce is refreshed to guarantee that every new authentication flow uses
+ * a unique value.
+ */
 export const useEmbeddedKeyAndNonce = () => {
   const { createEmbeddedKey } = useTurnkey();
 
@@ -145,7 +159,7 @@ export const useEmbeddedKeyAndNonce = () => {
 
       const hashedNonce = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        pubKey
+        pubKey,
       );
       setNonce(hashedNonce);
     } catch (error) {

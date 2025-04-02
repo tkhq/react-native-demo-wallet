@@ -1,4 +1,4 @@
-package app.vercel.reactnativedemowallet
+package xyz.tkhqlabs.passkeyapp
 
 import android.app.Application
 import android.content.res.Configuration

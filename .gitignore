@@ -41,9 +41,16 @@ expo-env.d.ts
 # @end expo-cli
 .vercel
 
+# Ignore build artifacts
+ios/build/
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.cxx/
+ios/Pods/
+
 .env
-
-
 *.keystore
 *.apk
 .idea/

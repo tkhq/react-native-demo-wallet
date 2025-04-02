@@ -8,16 +8,12 @@
     "scheme": "react-native-demo-wallet",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "xyz.tkhqlabs.passkeyapp",
-      "associatedDomains": ["webcredentials:passkeyapp.tkhqlabs.xyz"],
+      "associatedDomains": [
+        "webcredentials:passkeyapp.tkhqlabs.xyz"
+      ],
       "infoPlist": {
         "CFBundleURLTypes": [
           {
@@ -26,47 +22,28 @@
             ]
           }
         ]
-      }
+      },
+      "appleTeamId": "74V7N6MW3W"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.vercel.reactnativedemowallet"
+      "package": "xyz.tkhqlabs.passkeyapp"
     },
     "web": {
       "bundler": "metro",
-      "output": "server",
+      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       [
-        "expo-router",
-        {
-          "origin": "https://react-native-demo-wallet.vercel.app"
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 35
-          }
-        }
-      ],
-      "expo-font"
+        "expo-router"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "origin": "https://react-native-demo-wallet.vercel.app"
-      },
-      "eas": {
-        "projectId": "2d9f416e-a769-4751-8924-bb31d9f65e02"
-      }
     }
   }
 }

@@ -1,9 +1,10 @@
+
 import { Keyboard, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { useState } from "react";
 import { parsePhoneNumber } from "~/lib/utils";
 import { EmailInput } from "~/components/auth/auth.email";
-import { LoaderButton } from "~/components/ui/loader-button";
+import { LoaderButton } from "~/components/ui/button";
 import { PhoneInput } from "~/components/auth/auth.phone";
 import { useTurnkey } from '@turnkey/sdk-react-native';
 

@@ -1,4 +1,4 @@
-package app.vercel.reactnativedemowallet
+package xyz.tkhqlabs.passkeyapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

@@ -1,10 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { ParsedPhoneNumber } from "./types";
 import { PhoneNumberUtil, RegionCode } from "google-libphonenumber";
-import {
-  CountryCode,
-  CountryCodeList,
-} from "react-native-country-picker-modal";
+import { CountryCode, CountryCodeList } from "react-native-country-picker-modal";
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
@@ -12,10 +10,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export interface ParsedPhoneNumber {
-  country: CountryCode;
-  nationalNumber: string;
-}
+export const withTimeout = <T>(promise: Promise<T>, timeoutMs = 5000, fallback: T): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) =>
+      setTimeout(() => resolve(fallback), timeoutMs)
+    ),
+  ]);
+};
+
 
 // parses a full phone number into its country code and national number
 export const parsePhoneNumber = (fullNumber: string): ParsedPhoneNumber => {

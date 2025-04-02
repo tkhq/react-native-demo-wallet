@@ -1,7 +1,7 @@
-import * as React from "react";
 import { View, Image } from "react-native";
 import { cn } from "~/lib/utils";
 import DefaultProfile from "~/assets/svgs/default-profile.svg";
+import { FC } from "react";
 
 interface AvatarProps {
   src?: string;
@@ -9,7 +9,7 @@ interface AvatarProps {
   className?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ src, alt, className }) => {
+export const Avatar: FC<AvatarProps> = ({ src, alt, className }) => {
   return (
     <View
       className={cn(

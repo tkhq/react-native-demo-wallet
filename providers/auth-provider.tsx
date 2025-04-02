@@ -1,29 +1,20 @@
-import {
-  ReactNode,
-  createContext,
-  useReducer,
-} from "react";
+import { ReactNode, createContext, useReducer } from "react";
 import { TurnkeyClient } from "@turnkey/http";
-import * as turnkeyRPC from "~/lib/turnkey-rpc";
 import {
   createPasskey,
   isSupported,
   PasskeyStamper,
 } from "@turnkey/react-native-passkey-stamper";
 import { useRouter } from "expo-router";
+import { LoginMethod } from "~/lib/types";
 import {
-  Email,
-  LoginMethod,
-  User,
-} from "~/lib/types";
-import { getAddress } from "viem";
-import {
+  BACKEND_API_URL,
   PASSKEY_APP_NAME,
+  RP_ID,
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
-  TURNKEY_RP_ID,
 } from "~/lib/constants";
-import { useTurnkey } from "@turnkey/sdk-react-native";
+import { User, useTurnkey } from "@turnkey/sdk-react-native";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -78,14 +69,8 @@ function authReducer(state: AuthState, action: AuthActionType): AuthState {
 
 export interface AuthRelayProviderType {
   state: AuthState;
-  initEmailLogin: (email: Email) => Promise<void>;
-  completeEmailAuth: (params: {
-    otpId: string;
-    otpCode: string;
-    organizationId: string;
-  }) => Promise<void>;
-  initPhoneLogin: (phone: string) => Promise<void>;
-  completePhoneAuth: (params: {
+  initOtpLogin: (params: { otpType: string; contact: string }) => Promise<void>;
+  completeOtpAuth: (params: {
     otpId: string;
     otpCode: string;
     organizationId: string;
@@ -103,10 +88,8 @@ export interface AuthRelayProviderType {
 
 export const AuthRelayContext = createContext<AuthRelayProviderType>({
   state: initialState,
-  initEmailLogin: async () => Promise.resolve(),
-  completeEmailAuth: async () => Promise.resolve(),
-  initPhoneLogin: async () => Promise.resolve(),
-  completePhoneAuth: async () => Promise.resolve(),
+  initOtpLogin: async () => Promise.resolve(),
+  completeOtpAuth: async () => Promise.resolve(),
   signUpWithPasskey: async () => Promise.resolve(),
   loginWithPasskey: async () => Promise.resolve(),
   loginWithOAuth: async () => Promise.resolve(),
@@ -122,29 +105,33 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const router = useRouter();
-  const {
-    client,
-    user,
-    refreshUser,
-    createEmbeddedKey,
-    createSession,
-    clearSession,
-  } = useTurnkey();
+  const { createEmbeddedKey, createSession } = useTurnkey();
 
-  const initEmailLogin = async (email: Email) => {
-    dispatch({ type: "LOADING", payload: LoginMethod.Email });
+  const initOtpLogin = async ({
+    otpType,
+    contact,
+  }: {
+    otpType: string;
+    contact: string;
+  }) => {
+    dispatch({
+      type: "LOADING",
+      payload:
+        otpType === "OTP_TYPE_EMAIL" ? LoginMethod.Email : LoginMethod.Phone,
+    });
     try {
-      const response = await turnkeyRPC.initOTPAuth({
-        otpType: "OTP_TYPE_EMAIL",
-        contact: email,
-      });
+      const response = await fetch(`${BACKEND_API_URL}/auth/initOtpAuth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otpType, contact }),
+      }).then((res) => res.json());
 
       if (response) {
         dispatch({ type: "INIT_EMAIL_AUTH" });
         router.push(
           `/otp-auth?otpId=${encodeURIComponent(
-            response.otpId
-          )}&organizationId=${encodeURIComponent(response.organizationId)}`
+            response.otpId,
+          )}&organizationId=${encodeURIComponent(response.organizationId)}`,
         );
       }
     } catch (error: any) {
@@ -154,7 +141,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
     }
   };
 
-  const completeEmailAuth = async ({
+  const completeOtpAuth = async ({
     otpId,
     otpCode,
     organizationId,
@@ -168,72 +155,21 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
       try {
         const targetPublicKey = await createEmbeddedKey();
 
-        const response = await turnkeyRPC.otpAuth({
-          otpId: otpId,
-          otpCode: otpCode,
-          organizationId: organizationId,
-          targetPublicKey,
-          invalidateExisting: false,
-        });
+        const response = await fetch(`${BACKEND_API_URL}/auth/otpAuth`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            otpId,
+            otpCode,
+            organizationId,
+            targetPublicKey,
+            invalidateExisting: false,
+          }),
+        }).then((res) => res.json());
 
-        if (response.credentialBundle) {
-          await createSession(response.credentialBundle);
-        }
-      } catch (error: any) {
-        dispatch({ type: "ERROR", payload: error.message });
-      } finally {
-        dispatch({ type: "LOADING", payload: null });
-      }
-    }
-  };
-
-  const initPhoneLogin = async (phone: string) => {
-    dispatch({ type: "LOADING", payload: LoginMethod.Phone });
-    try {
-      const response = await turnkeyRPC.initOTPAuth({
-        otpType: "OTP_TYPE_SMS",
-        contact: phone,
-      });
-
-      if (response) {
-        dispatch({ type: "INIT_PHONE_AUTH" });
-        router.push(
-          `/otp-auth?otpId=${encodeURIComponent(
-            response.otpId
-          )}&organizationId=${encodeURIComponent(response.organizationId)}`
-        );
-      }
-    } catch (error: any) {
-      dispatch({ type: "ERROR", payload: error.message });
-    } finally {
-      dispatch({ type: "LOADING", payload: null });
-    }
-  };
-
-  const completePhoneAuth = async ({
-    otpId,
-    otpCode,
-    organizationId,
-  }: {
-    otpId: string;
-    otpCode: string;
-    organizationId: string;
-  }) => {
-    if (otpCode) {
-      dispatch({ type: "LOADING", payload: LoginMethod.Phone });
-      try {
-        const targetPublicKey = await createEmbeddedKey();
-
-        const response = await turnkeyRPC.otpAuth({
-          otpId: otpId,
-          otpCode: otpCode,
-          organizationId: organizationId,
-          targetPublicKey,
-          invalidateExisting: false,
-        });
-
-        if (response.credentialBundle) {
-          await createSession(response.credentialBundle);
+        const credentialBundle = response.credentialBundle;
+        if (credentialBundle) {
+          await createSession({ bundle: credentialBundle });
         }
       } catch (error: any) {
         dispatch({ type: "ERROR", payload: error.message });
@@ -255,7 +191,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
       const authenticatorParams = await createPasskey({
         authenticatorName: "End-User Passkey",
         rp: {
-          id: TURNKEY_RP_ID,
+          id: RP_ID,
           name: PASSKEY_APP_NAME,
         },
         user: {
@@ -267,22 +203,26 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
         },
       });
 
-      const response = await turnkeyRPC.createSubOrg({
-        passkey: {
-          challenge: authenticatorParams.challenge,
-          attestation: authenticatorParams.attestation,
-        },
-      });
+      const response = await fetch(`${BACKEND_API_URL}/auth/createSubOrg`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          passkey: {
+            challenge: authenticatorParams.challenge,
+            attestation: authenticatorParams.attestation,
+          },
+        }),
+      }).then((res) => res.json());
 
       if (response.subOrganizationId) {
         // Successfully created sub-organization, proceed with the login flow
         const stamper = new PasskeyStamper({
-          rpId: TURNKEY_RP_ID,
+          rpId: RP_ID,
         });
 
         const httpClient = new TurnkeyClient(
           { baseUrl: TURNKEY_API_URL },
-          stamper
+          stamper,
         );
 
         const targetPublicKey = await createEmbeddedKey();
@@ -301,7 +241,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
             ?.credentialBundle;
 
         if (credentialBundle) {
-          await createSession(credentialBundle);
+          await createSession({ bundle: credentialBundle });
         }
       }
     } catch (error: any) {
@@ -319,12 +259,12 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
 
     try {
       const stamper = new PasskeyStamper({
-        rpId: TURNKEY_RP_ID,
+        rpId: RP_ID,
       });
 
       const httpClient = new TurnkeyClient(
         { baseUrl: TURNKEY_API_URL },
-        stamper
+        stamper,
       );
 
       const targetPublicKey = await createEmbeddedKey();
@@ -343,7 +283,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
           ?.credentialBundle;
 
       if (credentialBundle) {
-        await createSession(credentialBundle);
+        await createSession({ bundle: credentialBundle });
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -365,15 +305,20 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
   }) => {
     dispatch({ type: "LOADING", payload: LoginMethod.OAuth });
     try {
-      const response = await turnkeyRPC.oAuthLogin({
-        oidcToken,
-        providerName,
-        targetPublicKey,
-        expirationSeconds,
-      });
+      const response = await fetch(`${BACKEND_API_URL}/auth/oAuthLogin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oidcToken,
+          providerName,
+          targetPublicKey,
+          expirationSeconds,
+        }),
+      }).then((res) => res.json());
 
-      if (response.credentialBundle) {
-        await createSession(response.credentialBundle);
+      const credentialBundle = response.credentialBundle;
+      if (credentialBundle) {
+        await createSession({ bundle: credentialBundle });
       }
     } catch (error: any) {
       dispatch({ type: "ERROR", payload: error.message });
@@ -390,10 +335,8 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
     <AuthRelayContext.Provider
       value={{
         state,
-        initEmailLogin,
-        completeEmailAuth,
-        initPhoneLogin,
-        completePhoneAuth,
+        initOtpLogin,
+        completeOtpAuth,
         signUpWithPasskey,
         loginWithPasskey,
         loginWithOAuth,

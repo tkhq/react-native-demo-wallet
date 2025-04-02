@@ -3,21 +3,26 @@ import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { useAuthRelay } from "~/hooks/use-auth-relayer";
 import { isSupported } from "@turnkey/react-native-passkey-stamper";
-import { Email, LoginMethod } from "~/lib/types";
+import { LoginMethod, OtpType } from "~/lib/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cn } from "~/lib/utils";
 import { BaseButton } from "react-native-gesture-handler";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { EmailInput } from "./auth.email";
-import { LoaderButton } from "../ui/loader-button";
-import OrSeparator from "../or-separator";
 import { OAuth } from "./oauth";
 import { PhoneInput } from "./auth.phone";
+import { LoaderButton } from "../ui/button";
+import { Separator } from "../ui/separator";
 
 export const Auth = () => {
   const insets = useSafeAreaInsets();
-  const { state, initEmailLogin, initPhoneLogin, signUpWithPasskey, loginWithPasskey, loginWithOAuth } = useAuthRelay();
-
+  const {
+    state,
+    initOtpLogin,
+    signUpWithPasskey,
+    loginWithPasskey,
+    loginWithOAuth,
+  } = useAuthRelay();
 
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -55,7 +60,9 @@ export const Auth = () => {
               variant="outline"
               disabled={!!state.loading || !isValidEmail}
               loading={state.loading === LoginMethod.Email}
-              onPress={() => initEmailLogin(email as Email)}
+              onPress={() =>
+                initOtpLogin({ otpType: OtpType.Email, contact: email })
+              }
               className={cn("rounded-xl", {
                 "border-black": isValidEmail,
               })}
@@ -71,7 +78,9 @@ export const Auth = () => {
               variant="outline"
               disabled={!!state.loading || !isValidPhone}
               loading={state.loading === LoginMethod.Phone}
-              onPress={() => initPhoneLogin(phone)}
+              onPress={() =>
+                initOtpLogin({ otpType: OtpType.Sms, contact: phone })
+              }
               className={cn("rounded-xl", {
                 "border-black": isValidPhone,
               })}
@@ -102,6 +111,21 @@ export const Auth = () => {
           </View>
         </CardContent>
       </Card>
+    </View>
+  );
+};
+
+const OrSeparator = () => {
+  return (
+    <View className="relative">
+      <View className="absolute inset-0 flex flex-row items-center">
+        <Separator className="flex-1" />
+      </View>
+      <View className="relative flex justify-center items-center">
+        <Text className="bg-white px-2 text-xs uppercase text-gray-500">
+          Or
+        </Text>
+      </View>
     </View>
   );
 };
