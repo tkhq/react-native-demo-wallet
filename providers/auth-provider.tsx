@@ -1,5 +1,4 @@
 import { ReactNode, createContext, useReducer } from "react";
-import { TurnkeyClient } from "@turnkey/http";
 import {
   createPasskey,
   isSupported,
@@ -14,7 +13,7 @@ import {
   TURNKEY_API_URL,
   TURNKEY_PARENT_ORG_ID,
 } from "~/lib/constants";
-import { User, useTurnkey } from "@turnkey/sdk-react-native";
+import { TurnkeyClient, User, useTurnkey } from "@turnkey/sdk-react-native";
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }

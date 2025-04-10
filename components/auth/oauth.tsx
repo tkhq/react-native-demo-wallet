@@ -1,10 +1,9 @@
-import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState, useCallback } from "react";
-import { makeRedirectUri } from "expo-auth-session";
 import { Button } from "../ui/button";
 import { Platform, View } from "react-native";
 import {
+  APP_SCHEME,
   GOOGLE_CLIENT_ID,
   GOOGLE_REDIRCT_URI,
   OAUTH_TOKEN_EXPIRATION_SECONDS,
@@ -56,7 +55,7 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
         clientId: GOOGLE_CLIENT_ID,
         redirectUri: GOOGLE_REDIRCT_URI,
         nonce: nonce!,
-        scheme: "does this even matter?",
+        scheme: APP_SCHEME,
         onIdToken,
       });
     } catch (error) {
