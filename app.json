@@ -14,15 +14,6 @@
       "associatedDomains": [
         "webcredentials:passkeyapp.tkhqlabs.xyz"
       ],
-      "infoPlist": {
-        "CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm"
-            ]
-          }
-        ]
-      },
       "appleTeamId": "74V7N6MW3W"
     },
     "android": {
