@@ -13,8 +13,7 @@ import { DEFAULT_ETHEREUM_ACCOUNTS } from "~/lib/constants";
 import { useTurnkey } from "@turnkey/sdk-react-native";
 
 const Dashboard = () => {
-  const { user, createWallet } = useTurnkey();
-  const { exportWallet, signRawPayload } = useTurnkey();
+  const { user, createWallet, exportWallet } = useTurnkey();
   const router = useRouter();
   
   const [showMenu, setShowMenu] = useState(false);
@@ -48,7 +47,7 @@ const Dashboard = () => {
     <View className="flex-1">
       <ScrollView className="flex-1 p-5" keyboardShouldPersistTaps="handled">
         {user?.wallets.map((wallet) => (
-          <WalletCard key={wallet.id} wallet={wallet} exportWallet={exportWallet} signRawPayload={signRawPayload} />
+          <WalletCard key={wallet.id} wallet={wallet} exportWallet={exportWallet} />
         ))}
       </ScrollView>
       <View className="absolute bottom-12 left-0 right-0 flex items-center">

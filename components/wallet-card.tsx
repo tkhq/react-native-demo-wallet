@@ -10,7 +10,6 @@ import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
 import { useTurnkey, Wallet } from "@turnkey/sdk-react-native";
-import { SignRawPayloadResult } from "~/lib/types";
 import { SignWithWalletButton } from "./sign";
 import { createAccount } from "@turnkey/viem";
 import { createWalletClient, http } from "viem";

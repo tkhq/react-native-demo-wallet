@@ -39,7 +39,7 @@ You should copy these files and rename them to `.env`, then update the values as
 EXPO_PUBLIC_PASSKEY_APP_NAME="<your_app_name>"
 EXPO_PUBLIC_RPID="<your_rpid_domain>"
 EXPO_PUBLIC_BACKEND_API_URL="<your_backend_api_url>"
-EXPO_PUBLIC_APP_SCHEME="<your_app_scheme>"
+EXPO_PUBLIC_APP_SCHEME="<your_app_scheme>"   # Replace with your app scheme (myapp or myapp://)
 
 ## Turnkey Configuration
 EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID="<your_turnkey_organization_id>"

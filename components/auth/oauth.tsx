@@ -44,7 +44,7 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
     });
 
     // we refresh the nonce before authentication to ensure a new one is used
-    // if the user logs out and logs in with oaAuth again
+    // if the user logs out and logs in with oAuth again
     await refreshNonce();
   };
 
@@ -104,7 +104,7 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
         });
 
         // we refresh the nonce before authentication to ensure a new one is used
-        // if the user logs out and logs in with oaAuth again
+        // if the user logs out and logs in with oAuth again
         await refreshNonce();
       }
     } catch (error) {
