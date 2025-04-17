@@ -46,9 +46,7 @@ EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID="<your_turnkey_organization_id>"
 EXPO_PUBLIC_TURNKEY_API_URL="https://api.turnkey.com"
 
 ## Google OAuth Credentials
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="<your_google_ios_client_id>"
-EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID="<your_google_android_client_id>"
-EXPO_PUBLIC_GOOGLE_REDIRECT_URI="<your_google_redirect_uri>"
+EXPO_PUBLIC_GOOGLE_CLIENT_ID="<your_google_web_client_id>"
 ```
 
 #### **Backend (`.env` in `example-server`)**
@@ -113,29 +111,26 @@ To enable passkeys, you must configure your app’s `app.json` file and set up a
 EXPO_PUBLIC_RPID="<your_rpid_domain>"
 ```
 
-## **OAuth Setup**
+## OAuth Setup
 
-If using OAuth, you need to configure the app's `app.json` for URL schemes.
+To configure Google OAuth, follow these steps:
 
-### **1. Update `app.json` to include your Google OAuth redirect scheme:**
+### 1. Create a Google Web Client ID:
+- Go to [Google Cloud Console](https://console.cloud.google.com/).
+- Create a new OAuth client ID.
+- Set the authorized origin to:
+  ```
+  https://oauth-origin.turnkey.com
+  ```
+- Set the authorized redirect URI to:
+  ```
+  https://oauth-redirect.turnkey.com?scheme=react-native-demo-wallet
+  ```
 
-```json
-{
-  "ios": {
-    "infoPlist": {
-      "CFBundleURLTypes": [
-        {
-          "CFBundleURLSchemes": ["<your_google_redirect_scheme>"]
-        }
-      ]
-    }
-  }
-}
-```
+### 2. Set your Client ID in `.env`:
 
-### **2. Ensure OAuth credentials are set in `.env`**
+In your project's `.env` file, add the following:
 
 ```ini
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID="<your_google_ios_client_id>"
-EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID="<your_google_android_client_id>"
+EXPO_PUBLIC_GOOGLE_CLIENT_ID="<your_google_web_client_id>"
 ```

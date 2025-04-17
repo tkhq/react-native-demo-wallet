@@ -38,6 +38,4 @@ export const RP_ID = process.env.EXPO_PUBLIC_RPID ?? "";
 export const PASSKEY_APP_NAME = process.env.EXPO_PUBLIC_PASSKEY_APP_NAME ?? "";
 
 export const OAUTH_TOKEN_EXPIRATION_SECONDS = "3600";
-export const GOOGLE_REDIRCT_URI =
-  process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI ?? "";
 export const GOOGLE_CLIENT_ID =process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";

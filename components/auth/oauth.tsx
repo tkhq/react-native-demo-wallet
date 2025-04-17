@@ -1,11 +1,10 @@
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import {
   APP_SCHEME,
   GOOGLE_CLIENT_ID,
-  GOOGLE_REDIRCT_URI,
   OAUTH_TOKEN_EXPIRATION_SECONDS,
 } from "~/lib/constants";
 import * as Crypto from "expo-crypto";
@@ -53,10 +52,9 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
     try {
       await handleGoogleOAuth({
         clientId: GOOGLE_CLIENT_ID,
-        redirectUri: GOOGLE_REDIRCT_URI,
         nonce: nonce!,
         scheme: APP_SCHEME,
-        onIdToken,
+        onSuccess: onIdToken,
       });
     } catch (error) {
       console.error("Error in Google Auth:", error);
