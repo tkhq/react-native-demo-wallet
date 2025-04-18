@@ -29,7 +29,8 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.googleusercontent.apps.776352896366-vscu7dt8umrlihuv8g54laphblm2rsbm</string>
+          <string>react-native-demo-wallet</string>
+          <string>xyz.tkhqlabs.passkeyapp</string>
         </array>
       </dict>
     </array>

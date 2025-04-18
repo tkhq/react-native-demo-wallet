@@ -1,13 +1,10 @@
-import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState, useCallback } from "react";
-import { makeRedirectUri } from "expo-auth-session";
 import { Button } from "../ui/button";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import {
-  GOOGLE_ANDROID_CLIENT_ID,
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_REDIRCT_URI,
+  APP_SCHEME,
+  GOOGLE_CLIENT_ID,
   OAUTH_TOKEN_EXPIRATION_SECONDS,
 } from "~/lib/constants";
 import * as Crypto from "expo-crypto";
@@ -36,44 +33,39 @@ export const GoogleAuthButton: React.FC<AuthButtonProps> = ({
   targetPublicKey,
   refreshNonce,
 }) => {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: Platform.select({
-      ios: GOOGLE_IOS_CLIENT_ID,
-      android: GOOGLE_ANDROID_CLIENT_ID,
-    }),
-    redirectUri: makeRedirectUri({
-      native: GOOGLE_REDIRCT_URI,
-    }),
-    scopes: ["openid", "profile", "email"],
-    extraParams: nonce ? { nonce } : {},
-  });
+  const { handleGoogleOAuth } = useTurnkey();
 
-  useEffect(() => {
-    const handleResponse = async () => {
-      if (response?.type === "success" && targetPublicKey) {
-        const { id_token } = response.params;
+  const onIdToken = async (idToken: string) => {
+    await onSuccess({
+      oidcToken: idToken,
+      providerName: "google",
+      targetPublicKey: targetPublicKey!,
+      expirationSeconds: OAUTH_TOKEN_EXPIRATION_SECONDS,
+    });
 
-        await onSuccess({
-          oidcToken: id_token,
-          providerName: "google",
-          targetPublicKey,
-          expirationSeconds: OAUTH_TOKEN_EXPIRATION_SECONDS,
-        });
+    // we refresh the nonce before authentication to ensure a new one is used
+    // if the user logs out and logs in with oAuth again
+    await refreshNonce();
+  };
 
-        // we refresh the nonce before authentication to ensure a new one is used
-        // if the user logs out and logs in with oaAuth again
-        await refreshNonce();
-      }
-    };
-
-    handleResponse();
-  }, [response]);
+  const handlePress = async () => {
+    try {
+      await handleGoogleOAuth({
+        clientId: GOOGLE_CLIENT_ID,
+        nonce: nonce!,
+        scheme: APP_SCHEME,
+        onSuccess: onIdToken,
+      });
+    } catch (error) {
+      console.error("Error in Google Auth:", error);
+    }
+  };
 
   return (
     <Button
-      onPress={() => promptAsync()}
+      onPress={handlePress}
       className="border border-black rounded-xl bg-transparent flex-row items-center justify-center flex-1 h-16"
-      disabled={!request || !nonce || !targetPublicKey}
+      disabled={!nonce || !targetPublicKey}
     >
       <View className="flex flex-col items-center justify-center">
         <GoogleIcon width={28} height={28} />
@@ -112,7 +104,7 @@ export const AppleAuthButton: React.FC<AuthButtonProps> = ({
         });
 
         // we refresh the nonce before authentication to ensure a new one is used
-        // if the user logs out and logs in with oaAuth again
+        // if the user logs out and logs in with oAuth again
         await refreshNonce();
       }
     } catch (error) {
@@ -159,7 +151,7 @@ export const useEmbeddedKeyAndNonce = () => {
 
       const hashedNonce = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        pubKey,
+        pubKey
       );
       setNonce(hashedNonce);
     } catch (error) {
