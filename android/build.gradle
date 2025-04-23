@@ -9,6 +9,7 @@ buildscript {
         kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
 
         ndkVersion = "26.1.10909125"
+        androidXBrowser = "1.8.0"
     }
     repositories {
         google()

@@ -14,6 +14,8 @@ import {
   TURNKEY_PARENT_ORG_ID,
 } from "~/lib/constants";
 import { TurnkeyClient, User, useTurnkey } from "@turnkey/sdk-react-native";
+import { v4 as uuidv4 } from 'uuid';
+
 
 type AuthActionType =
   | { type: "PASSKEY"; payload: User }
@@ -194,7 +196,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
           name: PASSKEY_APP_NAME,
         },
         user: {
-          id: String(Date.now()),
+          id: uuidv4(),
           // Name and displayName must match
           // This name is visible to the user. This is what's shown in the passkey prompt
           name: "Anonymous User",
