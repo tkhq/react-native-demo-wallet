@@ -35,6 +35,12 @@ export type CreateSubOrgParams = {
     attestation: Attestation;
   };
   oauth?: OAuthProviderParams;
+  apiKeys?: {
+    apiKeyName: string;
+    publicKey: string;
+    curveType: CurveType;
+    expirationSeconds?: string;
+}[]
 };
 
 export type CreateSubOrgResponse = {
@@ -72,3 +78,4 @@ export type OAuthLoginResponse = {
 };
 
 export type Attestation = TurnkeyApiTypes["v1Attestation"];
+export type CurveType = TurnkeyApiTypes["v1ApiKeyCurve"];
