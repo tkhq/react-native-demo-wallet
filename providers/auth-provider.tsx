@@ -182,7 +182,7 @@ export const AuthRelayProvider: React.FC<AuthRelayProviderProps> = ({
     }
   };
 
-  // User will be prompted twice for passkey, once for account creation and once for login
+  // User will be prompted once for passkey creation then will leverage an api key session to have a smooth "one tap" login experience
   const signUpWithPasskey = async () => {
     if (!isSupported()) {
       throw new Error("Passkeys are not supported on this device");
