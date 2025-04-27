@@ -21,7 +21,7 @@
     "@rn-primitives/separator": "^1.1.0",
     "@rn-primitives/slot": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
-    "@turnkey/sdk-react-native": "https://pkg.csb.dev/tkhq/sdk/commit/45ff10d6/@turnkey/sdk-react-native",
+    "@turnkey/sdk-react-native": "^1.2.0",
     "@turnkey/viem": "^0.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
