@@ -9,7 +9,7 @@ import { getBalance, getTokenPrice } from "~/lib/web3";
 import { ExportWalletButton } from "./export";
 import { Button } from "./ui/button";
 import { BaseButton } from "react-native-gesture-handler";
-import { useTurnkey, Wallet } from "@turnkey/sdk-react-native";
+import { TurnkeyClient, useTurnkey, Wallet } from "@turnkey/sdk-react-native";
 import { SignWithWalletButton } from "./sign";
 import { createAccount } from "@turnkey/viem";
 import { createWalletClient, http } from "viem";
@@ -69,7 +69,7 @@ export const WalletCard = (props: WalletCardProps) => {
   const confirmSignMessage = async () => {
     try {
       const viemAccount = await createAccount({
-        client: client!,
+        client: client as TurnkeyClient,
         organizationId: user?.organizationId!,
         signWith: selectedAccount?.address as string,
         ethereumAddress: selectedAccount?.address as string,
