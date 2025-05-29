@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		11BF1E360A78286644A90FCE /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B809677A96E10E3327F8085 /* ExpoModulesProvider.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		18B3A6B4E1D5D7D17F986FC8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 86B411CDA968029B9941D4BD /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+		4980F44FD84355362B427385 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3936E7B4D2C0E29EED637F /* ExpoModulesProvider.swift */; };
+		952956054B4E4E10D36CB896 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A5810DBF2765EB2B1FE2B664 /* PrivacyInfo.xcprivacy */; };
+		B09D1AF3ECFD9D2E48320FC5 /* libPods-ReactNativeDemoWallet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 42E6D8B17612CF08E031CBC8 /* libPods-ReactNativeDemoWallet.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		BEF57F528B6EB9C40444A370 /* libPods-ReactNativeDemoWallet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6947A05360B709374DBBCCC8 /* libPods-ReactNativeDemoWallet.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -20,16 +20,16 @@
 		13B07F961A680F5B00A75B9A /* ReactNativeDemoWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReactNativeDemoWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ReactNativeDemoWallet/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ReactNativeDemoWallet/Info.plist; sourceTree = "<group>"; };
-		4B809677A96E10E3327F8085 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-ReactNativeDemoWallet/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		4EFB80CCD11AA381BD14D438 /* Pods-ReactNativeDemoWallet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeDemoWallet.release.xcconfig"; path = "Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet.release.xcconfig"; sourceTree = "<group>"; };
-		6947A05360B709374DBBCCC8 /* libPods-ReactNativeDemoWallet.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactNativeDemoWallet.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		86B411CDA968029B9941D4BD /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = ReactNativeDemoWallet/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		42E6D8B17612CF08E031CBC8 /* libPods-ReactNativeDemoWallet.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactNativeDemoWallet.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B3936E7B4D2C0E29EED637F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-ReactNativeDemoWallet/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		A5810DBF2765EB2B1FE2B664 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = ReactNativeDemoWallet/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = ReactNativeDemoWallet/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		C661370DC89810DEAC351303 /* Pods-ReactNativeDemoWallet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeDemoWallet.release.xcconfig"; path = "Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet.release.xcconfig"; sourceTree = "<group>"; };
+		E37A00C095C509E80C298E8B /* Pods-ReactNativeDemoWallet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeDemoWallet.debug.xcconfig"; path = "Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ReactNativeDemoWallet/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* ReactNativeDemoWallet-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ReactNativeDemoWallet-Bridging-Header.h"; path = "ReactNativeDemoWallet/ReactNativeDemoWallet-Bridging-Header.h"; sourceTree = "<group>"; };
-		FCFABC04CA6855A63066EB0B /* Pods-ReactNativeDemoWallet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeDemoWallet.debug.xcconfig"; path = "Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,13 +37,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEF57F528B6EB9C40444A370 /* libPods-ReactNativeDemoWallet.a in Frameworks */,
+				B09D1AF3ECFD9D2E48320FC5 /* libPods-ReactNativeDemoWallet.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		103CBD7915D86A4C53071E47 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				81727D75DC8CF57E4338D17B /* ReactNativeDemoWallet */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* ReactNativeDemoWallet */ = {
 			isa = PBXGroup;
 			children = (
@@ -53,7 +61,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				86B411CDA968029B9941D4BD /* PrivacyInfo.xcprivacy */,
+				A5810DBF2765EB2B1FE2B664 /* PrivacyInfo.xcprivacy */,
 			);
 			name = ReactNativeDemoWallet;
 			sourceTree = "<group>";
@@ -62,9 +70,27 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				6947A05360B709374DBBCCC8 /* libPods-ReactNativeDemoWallet.a */,
+				42E6D8B17612CF08E031CBC8 /* libPods-ReactNativeDemoWallet.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		363A04AF594D475676BBFC96 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E37A00C095C509E80C298E8B /* Pods-ReactNativeDemoWallet.debug.xcconfig */,
+				C661370DC89810DEAC351303 /* Pods-ReactNativeDemoWallet.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		81727D75DC8CF57E4338D17B /* ReactNativeDemoWallet */ = {
+			isa = PBXGroup;
+			children = (
+				8B3936E7B4D2C0E29EED637F /* ExpoModulesProvider.swift */,
+			);
+			name = ReactNativeDemoWallet;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -81,8 +107,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				944F37F48420FBFB5275F43B /* Pods */,
-				8B478C273657DE25053CB13B /* ExpoModulesProviders */,
+				363A04AF594D475676BBFC96 /* Pods */,
+				103CBD7915D86A4C53071E47 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -97,24 +123,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8B478C273657DE25053CB13B /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				FA012F9F443D5A4D0E54DDBD /* ReactNativeDemoWallet */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		944F37F48420FBFB5275F43B /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				FCFABC04CA6855A63066EB0B /* Pods-ReactNativeDemoWallet.debug.xcconfig */,
-				4EFB80CCD11AA381BD14D438 /* Pods-ReactNativeDemoWallet.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,14 +130,6 @@
 			);
 			name = Supporting;
 			path = ReactNativeDemoWallet/Supporting;
-			sourceTree = "<group>";
-		};
-		FA012F9F443D5A4D0E54DDBD /* ReactNativeDemoWallet */ = {
-			isa = PBXGroup;
-			children = (
-				4B809677A96E10E3327F8085 /* ExpoModulesProvider.swift */,
-			);
-			name = ReactNativeDemoWallet;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ReactNativeDemoWallet" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				12E1521AED5DF881B662DC7A /* [Expo] Configure project */,
+				FEED60BD571B112E521A2178 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				12849FCD2D7655265CF9175D /* [CP] Embed Pods Frameworks */,
+				0847F3AE4A42E16D38003B21 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				18B3A6B4E1D5D7D17F986FC8 /* PrivacyInfo.xcprivacy in Resources */,
+				952956054B4E4E10D36CB896 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,6 +217,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
+		};
+		0847F3AE4A42E16D38003B21 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -239,43 +257,6 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
-		};
-		12849FCD2D7655265CF9175D /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		12E1521AED5DF881B662DC7A /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-ReactNativeDemoWallet/expo-configure-project.sh\"\n";
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -313,6 +294,25 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ReactNativeDemoWallet/Pods-ReactNativeDemoWallet-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		FEED60BD571B112E521A2178 /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-ReactNativeDemoWallet/expo-configure-project.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -321,7 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				11BF1E360A78286644A90FCE /* ExpoModulesProvider.swift in Sources */,
+				4980F44FD84355362B427385 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,7 +330,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FCFABC04CA6855A63066EB0B /* Pods-ReactNativeDemoWallet.debug.xcconfig */;
+			baseConfigurationReference = E37A00C095C509E80C298E8B /* Pods-ReactNativeDemoWallet.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -356,7 +356,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.tkhqlabs.passkeyapp;
-				PRODUCT_NAME = ReactNativeDemoWallet;
+				PRODUCT_NAME = "ReactNativeDemoWallet";
 				SWIFT_OBJC_BRIDGING_HEADER = "ReactNativeDemoWallet/ReactNativeDemoWallet-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -367,7 +367,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4EFB80CCD11AA381BD14D438 /* Pods-ReactNativeDemoWallet.release.xcconfig */;
+			baseConfigurationReference = C661370DC89810DEAC351303 /* Pods-ReactNativeDemoWallet.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -388,7 +388,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.tkhqlabs.passkeyapp;
-				PRODUCT_NAME = ReactNativeDemoWallet;
+				PRODUCT_NAME = "ReactNativeDemoWallet";
 				SWIFT_OBJC_BRIDGING_HEADER = "ReactNativeDemoWallet/ReactNativeDemoWallet-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

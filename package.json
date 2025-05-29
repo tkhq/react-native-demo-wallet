@@ -21,8 +21,8 @@
     "@rn-primitives/separator": "^1.1.0",
     "@rn-primitives/slot": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
-    "@turnkey/sdk-react-native": "https://pkg.csb.dev/tkhq/sdk/commit/f434f57d/@turnkey/sdk-react-native",
-    "@turnkey/viem": "^0.9.1",
+    "@turnkey/sdk-react-native": "^1.3.0",
+    "@turnkey/viem": "^0.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "^53.0.9",
@@ -62,7 +62,7 @@
     "react-native-webview": "13.13.5",
     "tailwind-merge": "^3.0.2",
     "uuid": "^11.1.0",
-    "viem": "^2.1.1"
+    "viem": "^2.30.5"
   },
   "overrides": {
     "lucide-react-native": {
