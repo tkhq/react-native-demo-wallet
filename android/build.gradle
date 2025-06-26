@@ -2,6 +2,9 @@
 
 buildscript {
     ext {
+// @generated begin expo-gradle-ext-vars - expo prebuild (DO NOT MODIFY) sync-8148aaab086ec9de5b452f1513ae6558139eed5f
+	androidXBrowser = "1.8.0"
+// @generated end expo-gradle-ext-vars
         buildToolsVersion = findProperty('android.buildToolsVersion') ?: '35.0.0'
         minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '24')
         compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
@@ -9,7 +12,6 @@ buildscript {
         kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
 
         ndkVersion = "26.1.10909125"
-        androidXBrowser = "1.8.0"
     }
     repositories {
         google()
