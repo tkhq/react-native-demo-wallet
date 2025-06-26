@@ -32,6 +32,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-gradle-ext-vars",
+        {
+          "androidXBrowser": "1.8.0"
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
