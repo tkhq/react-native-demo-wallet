@@ -1,3 +1,10 @@
+⚠️ # Deprecated: Use the New React Native SDK
+
+> This demo is deprecated and no longer actively maintained.
+> We’ve released a new, improved React Native package — [@turnkey/react-native-wallet-kit](https://docs.turnkey.com/sdks/react-native/overview) which provides a simpler, more powerful developer experience and better integration with modern React Native apps.
+
+> Check out the updated demo here: https://github.com/tkhq/sdk/tree/main/examples/with-react-native-wallet-kit
+
 # React Native Demo Wallet
 
 This project is a React Native application designed to demonstrate wallet functionality. It is built on top of the [Expo Turnkey Template](https://github.com/tkhq/expo-template) and has been modified to serve as a full-fledged example application.
